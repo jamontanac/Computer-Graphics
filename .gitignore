@@ -11,3 +11,5 @@ __pycache__/
 
 # Files of Mac and Dropbox
 .DS_Store
+# Presentations
+Diapo/*

@@ -1,2 +1,2 @@
-# Graphic Computing
+# Computer Graphics
 -------------------

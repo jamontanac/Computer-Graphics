@@ -12,4 +12,11 @@ __pycache__/
 # Files of Mac and Dropbox
 .DS_Store
 # Presentations
-Diapo/*
+Diapo/*Drawing Lines/drawlines.py
+2D scenes/Makefile
+2D scenes/simple_scene.cpp
+2D scenes/simple_scene1.py
+2D scenes/simple_scene.py
+Update_ignore.sh
+Taller 1/Solutions/fill_boxes.cpp
+Taller 1/Solutions/fill_boxes.py

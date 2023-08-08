@@ -8,7 +8,7 @@ __pycache__/
 
 # Deliverables
 *.zip
-
+.vscode/*
 # Files of Mac and Dropbox
 .DS_Store
 # Presentations

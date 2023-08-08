@@ -25,8 +25,12 @@ struct Particle
 };
 
 Particle p;
-double g_x = 0, g_y = 9;
+double g_x, g_y;
 bool isLaunched = false;
+bool clicked = false;
+int collitions = 0;
+
+// -------------------------------------------------------------------------
 
 void InitializeParticle(double x, double y, double vx, double vy)
 {
@@ -36,34 +40,34 @@ void InitializeParticle(double x, double y, double vx, double vy)
     p.vy = vy;
     isLaunched = false;
 }
-// p.x = 0;
-// p.y = 0;
-// p.vx = 1;
-// p.vy = 1;
+
+// -------------------------------------------------------------------------
 
 void UpdateParticle(double dt)
 {
     if (isLaunched)
     {
-        // Predecir la próxima posición
+        // Predict next position
         double nextX = p.x + p.vx * dt;
         double nextY = p.y + p.vy * dt;
-        // Revisar colisiones con las paredes
+        // Check if the ball hitted the wall
         if (nextX < world_left || nextX > world_right)
         {
-            p.vx *= -1; // Invertir la velocidad en x
+            p.vx *= -1; // Invert velocity in x
+            collitions++; // Keep track of collitions
         }
         if (nextY < world_bottom || nextY > world_top)
         {
-            p.vy *= -1; // Invertir la velocidad en y
+            p.vy *= -1; // Invert position in y
+            collitions++; // Keep track of collitions
         }
-        // Avanzamos medio paso en velocidad
+        // Move forward half step on the speed
         p.vx += 0.5 * g_x * dt;
         p.vy += 0.5 * g_y * dt;
-        // Avanzamos un paso en posicion
+        // Move the position
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        // Avanzamos el medio paso restante en velocidad
+        // Move the speed the other half of step
         p.vx += 0.5 * g_x * dt;
         p.vy += 0.5 * g_y * dt;
     }
@@ -129,7 +133,7 @@ void draw()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glTranslatef(p.x, p.y, 0);
-    circle(0.05,GL_POLYGON);
+    circle(0.1,GL_POLYGON);
     glutSwapBuffers();
 }
 
@@ -137,26 +141,41 @@ void draw()
 
 void idle()
 {
-    // std::cout << "idle" << std::endl;
-    UpdateParticle(0.03); //
+    // std::cout << "idle"<< " " << p.vx << " " << p.vy << std::endl;
+    UpdateParticle(0.03); // render the dynamics ~30fps
+    // std::cout << "Num of Collitions: " << collitions << std::endl;
     glutPostRedisplay();
+    // Here we kill the program if it keeps bouncing more than 40 times
+    if(collitions > 40) {
+        glutDestroyWindow(main_window);
+        exit(EXIT_SUCCESS);
+    }
 }
 
 // -------------------------------------------------------------------------
 
 void click(int button, int state, int x, int y)
 {
-    bool click=false;
-    std::cout << "click: " << button << " " << state << " " << x << " " << y << std::endl;
+    // bool clicked=false;
+    // std::cout << "click: " << button << " " << state << " " << x << " " << y << " " << clicked << " " << isLaunched << std::endl;
 
+    double worldX = ((double)x / window_width) * (world_right - world_left) + world_left;
+    double worldY = ((double)(window_height - y) / window_height) * (world_top - world_bottom) + world_bottom;
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
         //tranformation to the coordinates of the world
-        double worldX = ((double)x / window_width) * (world_right - world_left) + world_left;
-        double worldY = ((double)(window_height - y) / window_height) * (world_top - world_bottom) + world_bottom;
         p.x= worldX;
         p.y= worldY;
+        // std::cout << "collitions: " << collitions << std::endl;
+        collitions = 0;
+        
         draw();
+        isLaunched = false;
+        clicked = true;
+    }
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && clicked )
+    {
+        clicked = false;
         isLaunched = true;
     }
 }
@@ -165,14 +184,17 @@ void click(int button, int state, int x, int y)
 
 void active_move(int x, int y)
 {
-    if (isLaunched)
+
+    //std::cout << "active: " << x << " " << y << std::endl;
+
+    // Transform from the frame to the world coordinates
+    double worldX = ((double)x / window_width) * (world_right - world_left) + world_left;
+    double worldY = ((double)(window_height - y) / window_height) * (world_top - world_bottom) + world_bottom;
+    if (!isLaunched)
     {
-        // Transforma las coordenadas de la ventana a las del mundo
-        double worldX = ((double)x / window_width) * (world_right - world_left) + world_left;
-        double worldY = ((double)(window_height - y) / window_height) * (world_top - world_bottom) + world_bottom;
-        // Configura la velocidad inicial en función de la distancia al clic del ratón
-        p.vx = (worldX - p.x) * 0.1;
-        p.vy = (worldY - p.y) * 0.1;
+        // Configure the initial velocity as a function of the distance of the mouse
+        p.vx = (worldX - p.x) * 2; // double the magnitude of speed
+        p.vy = (worldY - p.y) * 2;
     }
 }
 
@@ -189,8 +211,12 @@ void passive_move(int x, int y)
 void keyboard(unsigned char key, int x, int y)
 {
     if (key == 27 /*ESC*/)
-        if (main_window != 0)
+        if (main_window != 0){
             glutDestroyWindow(main_window);
+            exit(EXIT_SUCCESS);
+        }
+
+
 }
 
 // -------------------------------------------------------------------------

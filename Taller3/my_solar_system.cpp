@@ -206,7 +206,7 @@ void reshape(int width, int height)
   // Reset world-to-viewport transformation
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glScalef(s / aw * zoomFactor, s / ah * zoomFactor, 1.0);
+  glScalef(s / aw, s / ah, 1.0);
 
   // Prepare retro-projection matrix (pickup points)
   glGetFloatv(GL_PROJECTION_MATRIX, InvPrj);
@@ -277,8 +277,8 @@ void onMouseMove(int x, int y)
   if (isDragging)
   {
     // Calculate difference between current and previous mouse positions
-    float dx = (x - lastX) / zoomFactor;
-    float dy = (y - lastY) / zoomFactor;
+    float dx = (x - lastX);
+    float dy = (y - lastY);
 
     // Update the offsets (we negate the dx and dy to move in opposite direction)
     offsetX -= dx;
@@ -308,10 +308,10 @@ void draw()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
+  // make the respective translations and zooms
   glPushMatrix();
   glTranslatef(offsetX, offsetY, 0);
-  // std::cout << offsetX << " " << offsetY << " " << isDragging << std::endl;
+  glScalef(zoomFactor, zoomFactor, 1.0);
 
   t0 = std::chrono::high_resolution_clock::now();
   glColor3f(0, 0, 0);
@@ -321,6 +321,7 @@ void draw()
 
   glutPostRedisplay();
   // Prepare next frame
+  // everyone should inherence the transformations of the translations and zoom
   glPopMatrix();
   glutSwapBuffers();
 }

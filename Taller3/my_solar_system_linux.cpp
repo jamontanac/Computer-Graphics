@@ -43,6 +43,7 @@ float lastY = 0;
 float offsetX = 0;
 float offsetY = 0;
 
+float zoomFactor = 1.0;
 // -------------------------------------------------------------------------
 void circle(int mode = GL_LINE_LOOP, unsigned int samples = 30)
 {
@@ -179,6 +180,24 @@ bool matrix4x4_inv(float m[16], float invOut[16])
 }
 
 // -------------------------------------------------------------------------
+// void mouseWheel(int button, int dir, int x, int y)
+// {
+//   if (dir > 0)
+//   {
+//     // Zoom in
+//     zoomFactor *= 1.1f;
+//   }
+//   else
+//   {
+//     // Zoom out
+//     zoomFactor /= 1.1f;
+//   }
+
+//   // Request window refresh
+//   glutPostRedisplay();
+// }
+
+// -------------------------------------------------------------------------
 void reshape(int width, int height)
 {
   // Set the viewport to cover the new window size
@@ -203,7 +222,7 @@ void reshape(int width, int height)
   // Reset world-to-viewport transformation
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glScalef(s / aw, s / ah, 1.0);
+  glScalef(s / aw * zoomFactor, s / ah * zoomFactor, 1.0);
 
   // Prepare retro-projection matrix (pickup points)
   glGetFloatv(GL_PROJECTION_MATRIX, InvPrj);
@@ -241,6 +260,16 @@ void onMouse(int button, int state, int x, int y)
   int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
   int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
   // std::cout << "x: " << x << ", y: " << y << ", windowWidth: " << windowWidth << ", windowHeight: " << windowHeight << std::endl;
+  if (button == 3 && state == GLUT_DOWN)
+  {
+    std::cout << "Scroll up factor of " << zoomFactor << std::endl;
+    zoomFactor *= 1.1;
+  }
+  if (button == 4 && state == GLUT_DOWN)
+  {
+    std::cout << "Scroll down factor of" << std::endl;
+    zoomFactor *= 0.9;
+  }
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && x >= 0 && x <= windowWidth && y >= 0 && y <= windowHeight)
   {
@@ -248,7 +277,6 @@ void onMouse(int button, int state, int x, int y)
     isDragging = true;
     lastX = x;
     lastY = y;
-    // std::cout << x << " " << y << " " << lastX << " " << lastY << std::endl;
   }
   else
   {
@@ -274,7 +302,6 @@ void onMouseMove(int x, int y)
     lastX = x;
     lastY = y;
 
-    // std::cout << x << " " << y << " " << lastX << " " << lastY << std::endl;
     // Redraw the screen
     glutPostRedisplay();
   }
@@ -361,6 +388,7 @@ int main(int argc, char **argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(onMouse);
   glutMotionFunc(onMouseMove);
+  // glutMouseWheelFunc(mouseWheel);
 
   // Go!
   glutMainLoop();

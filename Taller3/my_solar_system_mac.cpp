@@ -95,10 +95,7 @@ void draw_hierarchy(const boost::property_tree::ptree &tree)
       _O color_node = i->second.get_child_optional("color");
       _O period_node = i->second.get_child_optional("period");
       float w_a = 0;
-      // float r = log(size_node.get().get<float>("") * 7 / 65911 + 1) * 5;
       float r = size_node.get().get<float>("");
-      // if (i->first == "Sun")
-      // r = 10;
 
       float o = 0;
       float cr = 1, cg = 1, cb = 1;
@@ -106,7 +103,6 @@ void draw_hierarchy(const boost::property_tree::ptree &tree)
         w_a = 1 / period_node.get().get<float>("");
       if (orbit_node)
         o = orbit_node.get().get<float>("");
-      //   o = orbit_node.get().get<float>("") * 490 / 4.495e9;
       if (color_node)
       {
         std::istringstream ci(color_node.get().get<std::string>(""));
@@ -117,7 +113,6 @@ void draw_hierarchy(const boost::property_tree::ptree &tree)
       current_position = fmod(current_position, 360);
       planetAngles[i->first] = current_position;
 
-      // std::cout << i->first << ": " << w_a << "  " << t << "  " << current_position << std::endl;
       // Save parent matrix and localization transformation
       glPushMatrix();
       glRotatef(current_position, 0, 0, 1);
@@ -144,7 +139,6 @@ void draw_hierarchy(const boost::property_tree::ptree &tree)
 // -------------------------------------------------------------------------
 void simulate(int msecs)
 {
-  // t0 = std::chrono::high_resolution_clock::now();
   draw_hierarchy(solar_system);
   glutTimerFunc(100, simulate, 0);
 }
@@ -285,10 +279,6 @@ void onMouseMove(int x, int y)
     glutPostRedisplay();
   }
 }
-// -------------------------------------------------------------------------
-void passive_move(int i, int j)
-{
-}
 
 // -------------------------------------------------------------------------
 void keyboard(unsigned char key, int x, int y)
@@ -314,7 +304,6 @@ void draw()
   glColor3f(0, 0, 0);
   simulate(1);
   // simulate
-  // draw_hierarchy( solar_system );
   glutTimerFunc(100, simulate, 0);
 
   glutPostRedisplay();
@@ -326,10 +315,7 @@ void draw()
 // -------------------------------------------------------------------------
 void idle()
 {
-
-  // draw_hierarchy(solar_system);
   glutPostRedisplay();
-  // glutTimerFunc(100, simulate, 0);
 }
 
 // -------------------------------------------------------------------------
@@ -375,7 +361,6 @@ int main(int argc, char **argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(onMouse);
   glutMotionFunc(onMouseMove);
-  glutPassiveMotionFunc(passive_move);
 
   // Go!
   glutMainLoop();

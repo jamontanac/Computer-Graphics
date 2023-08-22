@@ -1,0 +1,44 @@
+{
+  "Sun":
+  {
+    "size": "80",
+    "color": "1 1 1",
+    "planets":
+    {
+      "Mercury":
+      {
+        "size": "5",
+        "color": "0.5 0.6 0.4",
+        "orbit": "100",
+        "period": "0.240846"
+      },
+      "Venus": {
+        "size": "18",
+        "orbit": "160",
+        "period": "0.615",
+        "color": "0.9 0.7 0"
+      },
+      "Earth": {
+        "size": "20",
+        "color": "0.1 0.1 1",
+        "orbit": "250",
+        "period": "1",
+        "satellites":
+        {
+          "Moon": {
+            "size": "5",
+            "color": "0.9 0.9 0.9",
+            "orbit": "40",
+            "period": "0.0748"
+          }
+        }
+      },
+      "Mars": {
+        "size": "10",
+        "orbit": "370",
+        "period": "1.881",
+        "color": "0.8 0.4 0.2"
+      }
+    }
+  }
+}

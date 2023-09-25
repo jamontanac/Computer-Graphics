@@ -211,34 +211,57 @@ Stickman::
 
     float R_legs = 1.5;
     float H_legs = 30; 
-    this->m_Joints_legs[0].set_radius(R_legs);
-    this->m_Joints_legs[0].set_center(0,0,0);
+    for (unsigned int j = 0; j<nJoints_legs;j++)
+    {
+        this->m_Joints_legs[j].set_radius(R_legs);
+        this->m_Joints_legs[j].set_center(0, 0, 0);
 
-    this -> m_Legs[0].set_center(0,0,0);
-    this -> m_Legs[0].set_radius(R_legs);
-    this -> m_Legs[0].set_height(H_legs);
-    // this -> m_Arms[3].rotate(90,1,0,0);
+        this->m_Legs[j].set_center(0, 0, 0);
+        this->m_Legs[j].set_radius(R_legs);
+        this->m_Legs[j].set_height(H_legs / nJoints_legs);
 
-    this->m_Joints_legs[0].sample(10, 10);
-    this->m_Legs[0].sample(10, 10);
-    this->m_Joints_legs[0].add_child(&(this->m_Legs[0]));
-    this->Torso.add_child(&(this-> m_Joints_legs[0]),R_torso*0.5,0,-H_torso); 
+        this->m_Joints_legs[j].sample(10, 10);
+        this->m_Legs[j].sample(10, 10);
+        this->m_Joints_legs[j].add_child(&(this->m_Legs[j]));
 
+
+        this->m_Joints_legs[j+nJoints_legs].set_radius(R_legs);
+        this->m_Joints_legs[j+nJoints_legs].set_center(0, 0, 0);
+
+        this->m_Legs[j+nJoints_legs].set_center(0, 0, 0);
+        this->m_Legs[j+nJoints_legs].set_radius(R_legs);
+        this->m_Legs[j+nJoints_legs].set_height(H_legs / nJoints_legs);
+
+        this->m_Joints_legs[j+nJoints_legs].sample(10, 10);
+        this->m_Legs[j+nJoints_legs].sample(10, 10);
+        this->m_Joints_legs[j+nJoints_legs].add_child(&(this->m_Legs[j+nJoints_legs]));
+        if (j > 0)
+        {
+            this->m_Legs[j - 1].add_child(&(this->m_Joints_legs[j]), 0, 0, H_legs / nJoints_legs);
+            this->m_Legs[j+nJoints_legs - 1].add_child(&(this->m_Joints_legs[j+nJoints_legs]), 0, 0, H_legs / nJoints_legs);
+
+        }
+        else
+        {
+            this->Torso.add_child(&(this->m_Joints_legs[j]), R_torso * 0.5, 0, -H_torso);
+            this->Torso.add_child(&(this->m_Joints_legs[j+nJoints_legs]), -R_torso * 0.5, 0, -H_torso);
+        }
+    }
 
     //draw leg Left
     //same as before
-    this->m_Joints_legs[1].set_radius(R_legs);
-    this->m_Joints_legs[1].set_center(0,0,0);
+    // this->m_Joints_legs[1].set_radius(R_legs);
+    // this->m_Joints_legs[1].set_center(0,0,0);
 
-    this -> m_Legs[1].set_center(0,0,0);
-    this -> m_Legs[1].set_radius(R_legs);
-    this -> m_Legs[1].set_height(H_legs);
-    // this -> m_Arms[4].rotate(90,1,0,0);
+    // this -> m_Legs[1].set_center(0,0,0);
+    // this -> m_Legs[1].set_radius(R_legs);
+    // this -> m_Legs[1].set_height(H_legs);
+    // // this -> m_Arms[4].rotate(90,1,0,0);
 
-    this->m_Joints_legs[1].sample(10, 10);
-    this->m_Legs[1].sample(10, 10);
-    this->m_Joints_legs[1].add_child(&(this->m_Legs[1]));
-    this->Torso.add_child(&(this-> m_Joints_legs[1]),-R_torso*0.5,0,-H_torso);
+    // this->m_Joints_legs[1].sample(10, 10);
+    // this->m_Legs[1].sample(10, 10);
+    // this->m_Joints_legs[1].add_child(&(this->m_Legs[1]));
+    // this->Torso.add_child(&(this-> m_Joints_legs[1]),-R_torso*0.5,0,-H_torso);
 
     // for (unsigned int j = 0; j < nJoints; ++j)
 

@@ -1,4 +1,5 @@
 
+#define GL_SILENCE_DEPRECATION
 #include <PUJ_CGraf/SpotLight.h>
 
 #ifdef __APPLE__

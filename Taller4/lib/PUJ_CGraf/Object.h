@@ -46,6 +46,7 @@ namespace PUJ_CGraf
       this->m_Rotation[3] = z;
     }
     virtual void keypressed(unsigned char k) {}
+    // virtual void read_Json(const std::string &in_fname) {}
 
   protected:
     void _update_bounding_box();

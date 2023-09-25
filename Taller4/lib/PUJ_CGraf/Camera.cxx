@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 #include <PUJ_CGraf/Camera.h>
 
 #include <cmath>

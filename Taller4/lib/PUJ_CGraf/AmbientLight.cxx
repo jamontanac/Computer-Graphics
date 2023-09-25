@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 #include <PUJ_CGraf/AmbientLight.h>
 
 #ifdef __APPLE__

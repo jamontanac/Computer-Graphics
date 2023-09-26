@@ -12,7 +12,8 @@
 #include <fstream>
 #include <limits>
 #include <sstream>
-
+#include <map>
+#include <tuple>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -40,25 +41,38 @@ public:
         if (std::isdigit(k))
             this->m_Articulation = k - '0';
         else if (k == 'x')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 1, 0, 0);
+            this->m_Joints_arms[this->nJoints_arms - this->m_Articulation].rotate(1, -1, 0, 0);
+        }
         else if (k == 'X')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, -1, 0, 0);
+            this->m_Joints_arms[this->nJoints_arms - this->m_Articulation].rotate(1, 1, 0, 0);
+        }
         else if (k == 'y')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 1, 0);
+        }
         else if (k == 'Y')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, -1, 0);
+        }
         else if (k == 'z')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, 1);
+        }
         else if (k == 'Z')
+        {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, -1);
+        }
     }
     virtual void draw() const override;
 
-    // virtual void read_Json(const boost::property_tree::ptree &tree);
+    void create_torso_head(float height,float radius,float head_radius);
     void create_arms(float height, float radius,float torso_height,float torso_radius);
-    void print_json(const boost::property_tree::ptree &tree);
-    // int number_of_children() const;
-    // void create_articulation(unsigned int n_Joints, float Radius, float Height);
+    void create_legs(float height, float radius,float torso_radius);
+    void set_from_json(const boost::property_tree::ptree &tree);
     
 
 protected:
@@ -72,6 +86,7 @@ protected:
     std::vector<PUJ_CGraf::Cylinder> m_Arms;
     std::vector<PUJ_CGraf::Cylinder> m_Legs;
     boost::property_tree::ptree stickman_body;
+    std::map<std::string, std::tuple<float, float>> bodyAtrributes;
 
 };
 
@@ -129,83 +144,22 @@ Stickman::
     if (this->stickman_body.empty()){
         std::cerr << "Error: Failed to read the JSON file or the file is empty" << std::endl;
     }
-    print_json(this->stickman_body);
+    set_from_json(this->stickman_body);
 
+    float R_torso = std::get<0>(this->bodyAtrributes["Torso"]);
+    float H_torso = std::get<1>(this->bodyAtrributes["Torso"]);
 
-    // create_articulation(nJoints,3,8);
-    this->m_Joints_arms.resize(2*this->nJoints_arms);
-    this->m_Joints_legs.resize(2*this->nJoints_legs);
-    this->m_Arms.resize(2*this->nJoints_arms);
-    this->m_Legs.resize(2*this->nJoints_legs);
+    float R_head = std::get<0>(this->bodyAtrributes["Head"]);
 
-    this->m_Joints_legs.shrink_to_fit();
-    this->m_Joints_arms.shrink_to_fit();
-    this->m_Arms.shrink_to_fit();
-    this->m_Legs.shrink_to_fit();
+    float R_arms = std::get<0>(this->bodyAtrributes["Arms"]);
+    float H_arms = std::get<1>(this->bodyAtrributes["Arms"]);
 
-    //draw Torso and head
-    float H_torso = 30;
-    float R_head=12;
-    float R_torso=10;
-    
-    this->Torso.set_radius(R_torso);
-    this->Torso.set_height(H_torso);
-    this->Torso.set_center(0, 0, 0);
+    float R_legs =  std::get<0>(this->bodyAtrributes["Legs"]);
+    float H_legs = std::get<1>(this->bodyAtrributes["Legs"]); 
 
-    this->Head.set_radius(R_head);
-    this->Head.set_center(0, 0, 0);
-
-    this->Head.sample(10, 10);
-    this->Torso.sample(10, 10);
-    
-    this->Torso.add_child(&(this->Head),0,0,H_torso+R_head);
-
-    // draw Arms
-
-    float R_arms = 1.5;
-    float H_arms = 30;
+    create_torso_head(H_torso,R_torso,R_head);
     create_arms(H_arms,R_arms,H_torso,R_torso);
-
-    float R_legs = 1.5;
-    float H_legs = 30; 
-    for (unsigned int j = 0; j<this->nJoints_legs;j++)
-    {
-        this->m_Joints_legs[j].set_radius(R_legs);
-        this->m_Joints_legs[j].set_center(0, 0, 0);
-
-        this->m_Legs[j].set_center(0, 0, 0);
-        this->m_Legs[j].set_radius(R_legs);
-        this->m_Legs[j].set_height(-H_legs / this->nJoints_legs);
-
-        this->m_Joints_legs[j].sample(10, 10);
-        this->m_Legs[j].sample(10, 10);
-        this->m_Joints_legs[j].add_child(&(this->m_Legs[j]));
-
-
-        this->m_Joints_legs[j+this->nJoints_legs].set_radius(R_legs);
-        this->m_Joints_legs[j+this->nJoints_legs].set_center(0, 0, 0);
-
-        this->m_Legs[j+this->nJoints_legs].set_center(0, 0, 0);
-        this->m_Legs[j+this->nJoints_legs].set_radius(R_legs);
-        this->m_Legs[j+this->nJoints_legs].set_height(-H_legs / this->nJoints_legs);
-
-        this->m_Joints_legs[j+this->nJoints_legs].sample(10, 10);
-        this->m_Legs[j+this->nJoints_legs].sample(10, 10);
-        this->m_Joints_legs[j+this->nJoints_legs].add_child(&(this->m_Legs[j+this->nJoints_legs]));
-        if (j > 0)
-        {
-            this->m_Legs[j - 1].add_child(&(this->m_Joints_legs[j]), 0, 0, -H_legs / this->nJoints_legs);
-            this->m_Legs[j+this->nJoints_legs - 1].add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), 0, 0, -H_legs / this->nJoints_legs);
-
-        }
-        else
-        {
-            this->Torso.add_child(&(this->m_Joints_legs[j]), R_torso * 0.5, 0, 0);
-            this->Torso.add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), -R_torso * 0.5, 0, 0);
-        }
-    }
-
-    // this->m_Joints_legs[0].rotate(30,1,0,0);
+    create_legs(H_legs,R_legs,R_torso);
 
     this->m_BBox[0] = -50;
     this->m_BBox[1] = -50;
@@ -222,7 +176,62 @@ void Stickman::
     this-> Torso.draw(); // torso is the general object and everybody depends on him
 }
 
+void Stickman::set_from_json(const boost::property_tree::ptree &tree)
+{
+
+    using _T = boost::property_tree::ptree;
+    using _O = boost::optional<const _T &>;
+    using _It = _T::const_iterator;
+    for (_It i = tree.begin(); i != tree.end(); i++)
+    {
+        
+        // get Head
+        _O radius_node = i->second.get_child_optional("radius");
+        _O height_node = i->second.get_child_optional("height");
+        _O Joint_node = i->second.get_child_optional("nJoints");
+        if (i->first == "Head")
+            this->bodyAtrributes[i->first] = std::make_tuple(radius_node.get().get<float>(""), 0.0f);
+        if (Joint_node)
+        {
+            if (i->first == "Arms")
+            {
+                this->nJoints_arms = Joint_node.get().get<unsigned int>("");
+                this->m_Joints_arms.resize(2 * this->nJoints_arms);
+                this->m_Arms.resize(2 * this->nJoints_arms);
+                this->m_Joints_arms.shrink_to_fit();
+                this->m_Arms.shrink_to_fit();
+            }
+            else if (i->first == "Legs")
+            {
+                this->nJoints_legs = Joint_node.get().get<unsigned int>("");
+                this->m_Joints_legs.resize(2 * this->nJoints_legs);
+                this->m_Legs.resize(2 * this->nJoints_legs);
+                this->m_Joints_legs.shrink_to_fit();
+                this->m_Legs.shrink_to_fit();
+            }
+        }
+        if (radius_node && height_node)
+            this->bodyAtrributes[i->first] = std::make_tuple(radius_node.get().get<float>(""), height_node.get().get<float>(""));
+        set_from_json(i->second);
+    }
+}
 // -------------------------------------------------------------------------
+void Stickman::create_torso_head(float height,float radius,float head_radius)
+{
+
+    this->Torso.set_radius(radius);
+    this->Torso.set_height(height);
+    this->Torso.set_center(0, 0, 0);
+
+    this->Head.set_radius(head_radius);
+    this->Head.set_center(0, 0, 0);
+
+    this->Head.sample(10, 10);
+    this->Torso.sample(10, 10);
+    
+    this->Torso.add_child(&(this->Head),0,0,height+head_radius);
+
+}
 void Stickman::create_arms(float height, float radius,float torso_height,float torso_radius)
 {
 
@@ -271,32 +280,44 @@ void Stickman::create_arms(float height, float radius,float torso_height,float t
 }
 // -------------------------------------------------------------------------
 
-void Stickman::print_json(const boost::property_tree::ptree &tree)
+void Stickman::create_legs(float height, float radius,float torso_radius)
 {
-
-    using _T = boost::property_tree::ptree;
-    using _O = boost::optional<const _T &>;
-    using _It = _T::const_iterator;
-    for (_It i = tree.begin(); i != tree.end(); i++)
+    
+    for (unsigned int j = 0; j<this->nJoints_legs;j++)
     {
-        
-        _O Joint_node = i->second.get_child_optional("nJoints");
-        if (Joint_node){
+        this->m_Joints_legs[j].set_radius(radius);
+        this->m_Joints_legs[j].set_center(0, 0, 0);
 
-        std::cout
-            << i->first << ": " << i->second.get_value<std::string>()
-            << std::endl;
+        this->m_Legs[j].set_center(0, 0, 0);
+        this->m_Legs[j].set_radius(radius);
+        this->m_Legs[j].set_height(-height / this->nJoints_legs);
+
+        this->m_Joints_legs[j].sample(10, 10);
+        this->m_Legs[j].sample(10, 10);
+        this->m_Joints_legs[j].add_child(&(this->m_Legs[j]));
+
+
+        this->m_Joints_legs[j+this->nJoints_legs].set_radius(radius);
+        this->m_Joints_legs[j+this->nJoints_legs].set_center(0, 0, 0);
+
+        this->m_Legs[j+this->nJoints_legs].set_center(0, 0, 0);
+        this->m_Legs[j+this->nJoints_legs].set_radius(radius);
+        this->m_Legs[j+this->nJoints_legs].set_height(-height / this->nJoints_legs);
+
+        this->m_Joints_legs[j+this->nJoints_legs].sample(10, 10);
+        this->m_Legs[j+this->nJoints_legs].sample(10, 10);
+        this->m_Joints_legs[j+this->nJoints_legs].add_child(&(this->m_Legs[j+this->nJoints_legs]));
+        if (j > 0)
+        {
+            this->m_Legs[j - 1].add_child(&(this->m_Joints_legs[j]), 0, 0, -height / this->nJoints_legs);
+            this->m_Legs[j+this->nJoints_legs - 1].add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), 0, 0, -height / this->nJoints_legs);
+
         }
-        print_json(i->second);
-        // _O radius = i->second.get_child_optional("radius");
-        // if (radius)
-        // {
-        // std::cout << i->first << " " << i->second.get_value << std::endl;
-        // }
-        // else
-        // {
-        // read_json(i->second);
-        // }
+        else
+        {
+            this->Torso.add_child(&(this->m_Joints_legs[j]), torso_radius * 0.5, 0, 0);
+            this->Torso.add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), -torso_radius * 0.5, 0, 0);
+        }
     }
 }
 // void Stickman::read_Json()

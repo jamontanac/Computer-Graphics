@@ -1,24 +1,24 @@
 {
     "Torso":{
-        "radius": 5,
+        "radius": 12,
         "height": 30,
         "children":
         {
             "Head":
             {
-                "radius": 5
+                "radius": 14
             },
             "Arms":
             {
-                "radius": 1,
-                "height": 3,
-                "nJoints": 3 
+                "radius": 3.5,
+                "height": 30,
+                "nJoints": 2 
             },
             "Legs":
             {
-                "radius": 1.5,
-                "height": 4,
-                "nJoints": 3 
+                "radius": 5,
+                "height": 40,
+                "nJoints": 2 
             }
         }
     }

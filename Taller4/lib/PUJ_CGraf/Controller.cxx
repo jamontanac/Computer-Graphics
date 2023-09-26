@@ -144,12 +144,12 @@ void PUJ_CGraf::Controller::
 {
   if (k == '+')
   {
-    Self::s_World->camera()->move_radius(-1);
+    Self::s_World->camera()->move_radius(-5);
     glutPostRedisplay();
   }
   else if (k == '-')
   {
-    Self::s_World->camera()->move_radius(1);
+    Self::s_World->camera()->move_radius(5);
     glutPostRedisplay();
   }
   else if (std::isdigit(k) || k == 'x' || k == 'X' || k == 'y' || k == 'Y' || k == 'z' || k == 'Z')

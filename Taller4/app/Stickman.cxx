@@ -35,33 +35,36 @@ public:
     Stickman(const std::string &in_fname);
     virtual ~Stickman() = default;
 
-    // virtual void keypressed(unsigned char k) override
-    // {
-    //     if (std::isdigit(k))
-    //         this->m_Articulation = k - '0';
-    //     else if (k == 'x')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, 1, 0, 0);
-    //     else if (k == 'X')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, -1, 0, 0);
-    //     else if (k == 'y')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, 0, 1, 0);
-    //     else if (k == 'Y')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, 0, -1, 0);
-    //     else if (k == 'z')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, 0, 0, 1);
-    //     else if (k == 'Z')
-    //         this->m_Joints[this->m_Articulation].rotate(0.1, 0, 0, -1);
-    // }
+    virtual void keypressed(unsigned char k) override
+    {
+        if (std::isdigit(k))
+            this->m_Articulation = k - '0';
+        else if (k == 'x')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, 1, 0, 0);
+        else if (k == 'X')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, -1, 0, 0);
+        else if (k == 'y')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 1, 0);
+        else if (k == 'Y')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, 0, -1, 0);
+        else if (k == 'z')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, 1);
+        else if (k == 'Z')
+            this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, -1);
+    }
     virtual void draw() const override;
 
     // virtual void read_Json(const boost::property_tree::ptree &tree);
+    void create_arms(float height, float radius,float torso_height,float torso_radius);
     void print_json(const boost::property_tree::ptree &tree);
-    int number_of_children() const;
-    void create_articulation(unsigned int n_Joints, float Radius, float Height);
+    // int number_of_children() const;
+    // void create_articulation(unsigned int n_Joints, float Radius, float Height);
     
 
 protected:
     int m_Articulation{-1};
+    unsigned int nJoints_arms {3};
+    unsigned int nJoints_legs {3};
     PUJ_CGraf::Cylinder Torso;
     PUJ_CGraf::Sphere Head;
     std::vector<PUJ_CGraf::Sphere> m_Joints_arms;
@@ -128,14 +131,12 @@ Stickman::
     }
     print_json(this->stickman_body);
 
-    unsigned int nJoints_arms = 3;
-    unsigned int nJoints_legs = 3;
 
     // create_articulation(nJoints,3,8);
-    this->m_Joints_arms.resize(2*nJoints_arms);
-    this->m_Joints_legs.resize(2*nJoints_legs);
-    this->m_Arms.resize(2*nJoints_arms);
-    this->m_Legs.resize(2*nJoints_legs);
+    this->m_Joints_arms.resize(2*this->nJoints_arms);
+    this->m_Joints_legs.resize(2*this->nJoints_legs);
+    this->m_Arms.resize(2*this->nJoints_arms);
+    this->m_Legs.resize(2*this->nJoints_legs);
 
     this->m_Joints_legs.shrink_to_fit();
     this->m_Joints_arms.shrink_to_fit();
@@ -163,126 +164,48 @@ Stickman::
 
     float R_arms = 1.5;
     float H_arms = 30;
-    for (unsigned int j = 0; j<nJoints_arms;j++)
-    {
-        this->m_Joints_arms[j].set_radius(R_arms);
-        this->m_Joints_arms[j].set_center(0, 0, 0);
-        
-
-        this->m_Arms[j].set_center(0, 0, 0);
-        this->m_Arms[j].set_radius(R_arms);
-        this->m_Arms[j].set_height(H_arms / nJoints_arms);
-
-
-        this->m_Joints_arms[j].sample(10, 10);
-        this->m_Arms[j].sample(10, 10);
-        this->m_Joints_arms[j].add_child(&(this->m_Arms[j]));
-
-        this->m_Joints_arms[j+nJoints_arms].set_radius(R_arms);
-        this->m_Joints_arms[j+nJoints_arms].set_center(0, 0, 0);
-
-        this->m_Arms[j+nJoints_arms].set_center(0, 0, 0);
-        this->m_Arms[j+nJoints_arms].set_radius(R_arms);
-        this->m_Arms[j+nJoints_arms].set_height(H_arms / nJoints_arms);
-        
-        this->m_Joints_arms[j+nJoints_arms].sample(10, 10);
-        this->m_Arms[j+nJoints_arms].sample(10, 10);
-        this->m_Joints_arms[j+nJoints_arms].add_child(&(this->m_Arms[j+nJoints_arms]));
-
-        if (j > 0)
-        {
-            this->m_Arms[j - 1]
-                .add_child(&(this->m_Joints_arms[j]), 0, 0, H_arms / nJoints_arms);
-            this->m_Arms[j+nJoints_arms - 1]
-                .add_child(&(this->m_Joints_arms[j+nJoints_arms]), 0, 0, H_arms / nJoints_arms);
-        }
-        else
-        {
-            
-            this->m_Arms[j].rotate(90, 1, 0, 0);
-            this->m_Arms[j+nJoints_arms].rotate(90, 1, 0, 0);
-            this->Torso.add_child(&(this->m_Joints_arms[j]), R_torso, 0, 0.9 * H_torso);
-            this->Torso.add_child(&(this->m_Joints_arms[j+nJoints_arms]), -R_torso, 0, 0.9 * H_torso);
-        }
-        
-    }
-    //draw leg Right
-    //same as before
+    create_arms(H_arms,R_arms,H_torso,R_torso);
 
     float R_legs = 1.5;
     float H_legs = 30; 
-    for (unsigned int j = 0; j<nJoints_legs;j++)
+    for (unsigned int j = 0; j<this->nJoints_legs;j++)
     {
         this->m_Joints_legs[j].set_radius(R_legs);
         this->m_Joints_legs[j].set_center(0, 0, 0);
 
         this->m_Legs[j].set_center(0, 0, 0);
         this->m_Legs[j].set_radius(R_legs);
-        this->m_Legs[j].set_height(H_legs / nJoints_legs);
+        this->m_Legs[j].set_height(-H_legs / this->nJoints_legs);
 
         this->m_Joints_legs[j].sample(10, 10);
         this->m_Legs[j].sample(10, 10);
         this->m_Joints_legs[j].add_child(&(this->m_Legs[j]));
 
 
-        this->m_Joints_legs[j+nJoints_legs].set_radius(R_legs);
-        this->m_Joints_legs[j+nJoints_legs].set_center(0, 0, 0);
+        this->m_Joints_legs[j+this->nJoints_legs].set_radius(R_legs);
+        this->m_Joints_legs[j+this->nJoints_legs].set_center(0, 0, 0);
 
-        this->m_Legs[j+nJoints_legs].set_center(0, 0, 0);
-        this->m_Legs[j+nJoints_legs].set_radius(R_legs);
-        this->m_Legs[j+nJoints_legs].set_height(H_legs / nJoints_legs);
+        this->m_Legs[j+this->nJoints_legs].set_center(0, 0, 0);
+        this->m_Legs[j+this->nJoints_legs].set_radius(R_legs);
+        this->m_Legs[j+this->nJoints_legs].set_height(-H_legs / this->nJoints_legs);
 
-        this->m_Joints_legs[j+nJoints_legs].sample(10, 10);
-        this->m_Legs[j+nJoints_legs].sample(10, 10);
-        this->m_Joints_legs[j+nJoints_legs].add_child(&(this->m_Legs[j+nJoints_legs]));
+        this->m_Joints_legs[j+this->nJoints_legs].sample(10, 10);
+        this->m_Legs[j+this->nJoints_legs].sample(10, 10);
+        this->m_Joints_legs[j+this->nJoints_legs].add_child(&(this->m_Legs[j+this->nJoints_legs]));
         if (j > 0)
         {
-            this->m_Legs[j - 1].add_child(&(this->m_Joints_legs[j]), 0, 0, H_legs / nJoints_legs);
-            this->m_Legs[j+nJoints_legs - 1].add_child(&(this->m_Joints_legs[j+nJoints_legs]), 0, 0, H_legs / nJoints_legs);
+            this->m_Legs[j - 1].add_child(&(this->m_Joints_legs[j]), 0, 0, -H_legs / this->nJoints_legs);
+            this->m_Legs[j+this->nJoints_legs - 1].add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), 0, 0, -H_legs / this->nJoints_legs);
 
         }
         else
         {
-            this->Torso.add_child(&(this->m_Joints_legs[j]), R_torso * 0.5, 0, -H_torso);
-            this->Torso.add_child(&(this->m_Joints_legs[j+nJoints_legs]), -R_torso * 0.5, 0, -H_torso);
+            this->Torso.add_child(&(this->m_Joints_legs[j]), R_torso * 0.5, 0, 0);
+            this->Torso.add_child(&(this->m_Joints_legs[j+this->nJoints_legs]), -R_torso * 0.5, 0, 0);
         }
     }
 
-    //draw leg Left
-    //same as before
-    // this->m_Joints_legs[1].set_radius(R_legs);
-    // this->m_Joints_legs[1].set_center(0,0,0);
-
-    // this -> m_Legs[1].set_center(0,0,0);
-    // this -> m_Legs[1].set_radius(R_legs);
-    // this -> m_Legs[1].set_height(H_legs);
-    // // this -> m_Arms[4].rotate(90,1,0,0);
-
-    // this->m_Joints_legs[1].sample(10, 10);
-    // this->m_Legs[1].sample(10, 10);
-    // this->m_Joints_legs[1].add_child(&(this->m_Legs[1]));
-    // this->Torso.add_child(&(this-> m_Joints_legs[1]),-R_torso*0.5,0,-H_torso);
-
-    // for (unsigned int j = 0; j < nJoints; ++j)
-
-    // {
-    //     this->m_Joints[j].set_radius(5);
-    //     this->m_Joints[j].set_center(0, 0, 0);
-
-    //     this->m_Arms[j].set_radius(2);
-    //     this->m_Arms[j].set_height(h);
-    //     this->m_Arms[j].set_center(0, 0, 0);
-
-    //     this->m_Joints[j].sample(10, 10);
-    //     this->m_Arms[j].sample(10, 10);
-
-    //     this->m_Arms[j].add_child(&(this->m_Joints[j]));
-    //     if (j > 0)
-    //         this->m_Joints[j - 1]
-    //             .add_child(&(this->m_Arms[j]), 0, 0, h);
-    // } // end for
-
-
+    // this->m_Joints_legs[0].rotate(30,1,0,0);
 
     this->m_BBox[0] = -50;
     this->m_BBox[1] = -50;
@@ -297,46 +220,57 @@ void Stickman::
     draw() const
 {
     this-> Torso.draw(); // torso is the general object and everybody depends on him
-    // this -> Head.draw();
-    // if (this->m_Joints_arms.size() > 0)
-        // this->m_Joints_arms[0].draw();
-    // if (this->m_Joints_legs.size() > 0)
-        // this->m_Joints_legs[0].draw();
 }
 
-void Stickman::create_articulation(unsigned int n_Joints,float Radius, float Height)
+// -------------------------------------------------------------------------
+void Stickman::create_arms(float height, float radius,float torso_height,float torso_radius)
 {
-    std::vector<PUJ_CGraf::Sphere> m_Joints;
-    std::vector<PUJ_CGraf::Cylinder> m_Arms;
 
-    m_Joints.resize(n_Joints);
-    m_Arms.resize(n_Joints);
-    m_Joints.shrink_to_fit();
-    m_Arms.shrink_to_fit();
-
-    for (unsigned int j = 0; j < n_Joints; ++j)
+    for (unsigned int j = 0; j<this->nJoints_arms;j++)
     {
-        m_Joints[j].set_radius(2);
-        m_Joints[j].set_center(0, 0, 0);
+        this->m_Joints_arms[j].set_radius(radius);
+        this->m_Joints_arms[j].set_center(0, 0, 0);
+        
 
-        m_Arms[j].set_radius(Radius);
-        m_Arms[j].set_height(Height);
-        m_Arms[j].set_center(0, 0, 0);
+        this->m_Arms[j].set_center(0, 0, 0);
+        this->m_Arms[j].set_radius(radius);
+        this->m_Arms[j].set_height(height / this->nJoints_arms);
 
-        m_Joints[j].sample(10, 10);
-        m_Arms[j].sample(10, 10);
 
-        m_Joints[j].add_child(&(m_Arms[j]));
+        this->m_Joints_arms[j].sample(10, 10);
+        this->m_Arms[j].sample(10, 10);
+        this->m_Joints_arms[j].add_child(&(this->m_Arms[j]));
+
+        this->m_Joints_arms[j+this->nJoints_arms].set_radius(radius);
+        this->m_Joints_arms[j+this->nJoints_arms].set_center(0, 0, 0);
+
+        this->m_Arms[j+this->nJoints_arms].set_center(0, 0, 0);
+        this->m_Arms[j+this->nJoints_arms].set_radius(radius);
+        this->m_Arms[j+this->nJoints_arms].set_height(height / this->nJoints_arms);
+        
+        this->m_Joints_arms[j+this->nJoints_arms].sample(10, 10);
+        this->m_Arms[j+this->nJoints_arms].sample(10, 10);
+        this->m_Joints_arms[j+this->nJoints_arms].add_child(&(this->m_Arms[j+this->nJoints_arms]));
+
         if (j > 0)
-            m_Arms[j - 1].add_child(&(m_Joints[j]), 0, 0, Height);
-    } // end for
-
-    // for (unsigned int j = 0; j < n_Joints; ++j)
-    // {
-    //     this->m_Arms.push_back(m_Arms[j]);
-    //     this->m_Joints.push_back(m_Joints[j]);
-    // }
+        {
+            this->m_Arms[j - 1]
+                .add_child(&(this->m_Joints_arms[j]), 0, 0, height / this->nJoints_arms);
+            this->m_Arms[j+this->nJoints_arms - 1]
+                .add_child(&(this->m_Joints_arms[j+this->nJoints_arms]), 0, 0, height / this->nJoints_arms);
+        }
+        else
+        {
+            
+            this->m_Arms[j].rotate(90, 1, 0, 0);
+            this->m_Arms[j+this->nJoints_arms].rotate(90, 1, 0, 0);
+            this->Torso.add_child(&(this->m_Joints_arms[j]), torso_radius, 0, 0.9 * torso_height);
+            this->Torso.add_child(&(this->m_Joints_arms[j+this->nJoints_arms]), -torso_radius, 0, 0.9 * torso_height);
+        }
+    }
 }
+// -------------------------------------------------------------------------
+
 void Stickman::print_json(const boost::property_tree::ptree &tree)
 {
 

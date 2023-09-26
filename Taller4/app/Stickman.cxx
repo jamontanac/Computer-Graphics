@@ -320,23 +320,4 @@ void Stickman::create_legs(float height, float radius,float torso_radius)
         }
     }
 }
-// void Stickman::read_Json()
-// {
-
-//     using _T = boost::property_tree::ptree;
-//     using _O = boost::optional<const _T &>;
-//     using _It = _T::const_iterator;
-//     for (_It i = this->stickman_body.begin(); i != tree.end(); i++)
-//     {
-//         _O radius = i->second.get_child_optional("radius");
-//         if (radius)
-//         {
-//             std::cout << i->first << " " << i->second << std::endl;
-//         }
-//         else
-//         {
-//             Stickman::read_json(i->second);
-//         }
-//     }
-// }
 // eof - Stickman.cxx

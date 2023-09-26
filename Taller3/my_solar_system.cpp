@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -34,7 +35,9 @@ boost::property_tree::ptree solar_system;
 
 std::chrono::high_resolution_clock::time_point t0;
 
-float time_scale = 1e-3;
+std::chrono::high_resolution_clock::time_point StartTime;
+
+float time_scale = 20*1e-3;
 int ViewPort[4];
 float InvPrj[16];
 
@@ -44,7 +47,7 @@ float lastX = 0;
 float lastY = 0;
 float offsetX = 0;
 float offsetY = 0;
-
+bool s_Animating = false;
 float zoomFactor = 1.0;
 // -------------------------------------------------------------------------
 void circle(int mode = GL_LINE_LOOP, unsigned int samples = 30)
@@ -141,9 +144,23 @@ void draw_hierarchy(const boost::property_tree::ptree &tree)
 
 // -------------------------------------------------------------------------
 void simulate(int msecs)
-{
-  draw_hierarchy(solar_system);
-  glutTimerFunc(100, simulate, 0);
+{ 
+  using _R = std::chrono::milliseconds;
+  if(s_Animating)
+  {
+    if(msecs==1)
+      StartTime = std::chrono::high_resolution_clock::now( );
+    
+    unsigned long long d =std::chrono::duration_cast< _R >(std::chrono::high_resolution_clock::now( ) - StartTime).count( );
+    draw_hierarchy(solar_system);
+    glutPostRedisplay();
+    StartTime = std::chrono::high_resolution_clock::now( );
+    glutTimerFunc(20, simulate, 0);
+  }
+  else
+  { 
+    glutPostRedisplay( );
+  }
 }
 // -------------------------------------------------------------------------
 bool matrix4x4_inv(float m[16], float invOut[16])
@@ -299,6 +316,18 @@ void keyboard(unsigned char key, int x, int y)
   if (key == 27 /*ESC*/)
     if (main_window != 0)
       glutDestroyWindow(main_window);
+  if(key == '+')
+  {
+    if(!s_Animating)
+    {
+      s_Animating= true;
+      glutTimerFunc(20,simulate,1);
+    }
+  }
+  else if(key =='-'){
+    s_Animating = false;
+    glutTimerFunc(20, simulate, 0);
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -315,9 +344,10 @@ void draw()
 
   t0 = std::chrono::high_resolution_clock::now();
   glColor3f(0, 0, 0);
-  simulate(1);
+  draw_hierarchy(solar_system);
+  // simulate(1);
   // simulate
-  glutTimerFunc(100, simulate, 0);
+  // glutTimerFunc(100, simulate, 0);
 
   glutPostRedisplay();
   // Prepare next frame

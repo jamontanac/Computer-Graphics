@@ -11,10 +11,10 @@ OUTPUT = ball_dynamics
 # source files
 SOURCES = Ball_Dynamics.cpp
 
-all: ball_program
+all: $(OUTPUT) 
 
 # Compile the program
-ball_program: $(SOURCES)
+$(OUTPUT): $(SOURCES)
 	$(CC) $(CFLAGS) $(SOURCES) -o $(OUTPUT) 
 
 # Clean target to remove object files and compiled program

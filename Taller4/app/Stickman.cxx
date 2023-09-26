@@ -38,33 +38,42 @@ public:
 
     virtual void keypressed(unsigned char k) override
     {
+        int arm_index = 0;
+        if (this->m_Articulation < this->nJoints_arms)
+            arm_index = this->nJoints_arms + this->m_Articulation;
+        else if ((this->m_Articulation <= 2 * this->nJoints_arms) && (this->m_Articulation >= this->nJoints_arms))
+            arm_index = -this->nJoints_arms + this->m_Articulation;
         if (std::isdigit(k))
             this->m_Articulation = k - '0';
         else if (k == 'x')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 1, 0, 0);
-            this->m_Joints_arms[this->nJoints_arms - this->m_Articulation].rotate(1, -1, 0, 0);
+            this->m_Joints_arms[arm_index].rotate(1, -1, 0, 0);
         }
         else if (k == 'X')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, -1, 0, 0);
-            this->m_Joints_arms[this->nJoints_arms - this->m_Articulation].rotate(1, 1, 0, 0);
+            this->m_Joints_arms[arm_index].rotate(1, 1, 0, 0);
         }
         else if (k == 'y')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 1, 0);
+            this->m_Joints_arms[arm_index].rotate(1, 0, -1, 0);
         }
         else if (k == 'Y')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, -1, 0);
+            this->m_Joints_arms[arm_index].rotate(1, 0, 1, 0);
         }
         else if (k == 'z')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, 1);
+            this->m_Joints_arms[arm_index].rotate(1, 0, 0, -1);
         }
         else if (k == 'Z')
         {
             this->m_Joints_legs[this->m_Articulation].rotate(1, 0, 0, -1);
+            this->m_Joints_arms[arm_index].rotate(1, 0, 0, 1);
         }
     }
     virtual void draw() const override;
@@ -76,7 +85,7 @@ public:
     
 
 protected:
-    int m_Articulation{-1};
+    int m_Articulation{0};
     unsigned int nJoints_arms {3};
     unsigned int nJoints_legs {3};
     PUJ_CGraf::Cylinder Torso;
@@ -106,7 +115,6 @@ int main(int argc, char **argv)
     PUJ_CGraf::Controller::init(&argc, argv, "Robotic Arm", 700, 700);
     // Configure world
     Stickman body(jsonPath);
-    // body.read_Json(jsonPath);
 
     PUJ_CGraf::World world;
     world.add_child(&body);

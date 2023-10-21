@@ -19,8 +19,8 @@ CARAS = np.array([
     [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6],
     [0, 3, 7, 4], [4, 5, 6, 7], [0, 1, 2, 3]
 ])
-LONG_LAB = 10
-N_CAMINOS_CIEGOS = 5
+LONG_LAB = 50
+N_CAMINOS_CIEGOS = 20
 
 def cara_aleatoria(Vec, thresholds=[0.05,0.1,0.15,0.2]):
     r = random.uniform(0, 1)
@@ -120,7 +120,6 @@ def plot_maze():
     ax.set_zlim([z_min, z_max])
 
     plt.show()
-
 def create_vtk_cube(cube_vertices):
     # Create a cube using vtkPolyData
     cube = vtk.vtkPolyData()
@@ -150,48 +149,48 @@ def create_vtk_cube(cube_vertices):
     return cube
 
 def visualize_maze(VecCubos, VecCaminosCiegos):
-
-    # Create a mapper
-    mapper = vtk.vtkPolyDataMapper()
-
-    # Append all cubes to a single polydata object
-    appendFilter = vtk.vtkAppendPolyData()
-    for cube_vertices in VecCubos:
-        appendFilter.AddInputData(create_vtk_cube(cube_vertices))
-    for cube_vertices in VecCaminosCiegos:
-        appendFilter.AddInputData(create_vtk_cube(cube_vertices))
-    mapper.SetInputConnection(appendFilter.GetOutputPort())
-
-
-    # Create an actor for the main path
-    main_path_actor = vtk.vtkActor()
-    main_path_actor.SetMapper(mapper)
-    main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
-
     # Create a VTK renderer
     renderer = vtk.vtkRenderer()
-    renderer.SetBackground(0.3, 0.3, 0.3)  # Background color
+    renderer.SetBackground(0.1, 0.1, 0.1)  # Background color
 
     # Create a VTK render window
     render_window = vtk.vtkRenderWindow()
     render_window.AddRenderer(renderer)
-    render_window.SetWindowName("Laberith")
 
     # Create a VTK render window interactor
     render_window_interactor = vtk.vtkRenderWindowInteractor()
     render_window_interactor.SetRenderWindow(render_window)
-    renderer.AddActor(main_path_actor)
+
+
+    # Create a mapper for the blind paths
+    blind_path_mapper = vtk.vtkPolyDataMapper()
+    appendFilterBlind = vtk.vtkAppendPolyData()
+    for cube_vertices in VecCaminosCiegos:
+        appendFilterBlind.AddInputData(create_vtk_cube(cube_vertices))
+    blind_path_mapper.SetInputConnection(appendFilterBlind.GetOutputPort())
 
     # Create an actor for the blind paths
     blind_path_actor = vtk.vtkActor()
-    blind_path_actor.SetMapper(mapper)
+    blind_path_actor.SetMapper(blind_path_mapper)
     blind_path_actor.GetProperty().SetColor(0.0, 0.0, 1.0)  # Blue color
     renderer.AddActor(blind_path_actor)
 
+    # Create a mapper for the main path
+    main_path_mapper = vtk.vtkPolyDataMapper()
+    appendFilterMain = vtk.vtkAppendPolyData()
+    for cube_vertices in VecCubos:
+        appendFilterMain.AddInputData(create_vtk_cube(cube_vertices))
+    main_path_mapper.SetInputConnection(appendFilterMain.GetOutputPort())
 
+    # Create an actor for the main path
+    main_path_actor = vtk.vtkActor()
+    main_path_actor.SetMapper(main_path_mapper)
+    main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
+    renderer.AddActor(main_path_actor)
     # Start the visualization
     render_window.Render()
     render_window_interactor.Start()
+
 # Main Execution
 VecCubos, MatInfo = create_main_path()
 VecCaminosCiegos, MatInfoCiegos = create_blind_paths(np.array(MatInfo))

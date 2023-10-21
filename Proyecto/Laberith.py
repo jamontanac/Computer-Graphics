@@ -150,17 +150,6 @@ def create_vtk_cube(cube_vertices):
     return cube
 
 def visualize_maze(VecCubos, VecCaminosCiegos):
-    # Create a VTK renderer
-    renderer = vtk.vtkRenderer()
-    renderer.SetBackground(0.1, 0.1, 0.1)  # Background color
-
-    # Create a VTK render window
-    render_window = vtk.vtkRenderWindow()
-    render_window.AddRenderer(renderer)
-
-    # Create a VTK render window interactor
-    render_window_interactor = vtk.vtkRenderWindowInteractor()
-    render_window_interactor.SetRenderWindow(render_window)
 
     # Create a mapper
     mapper = vtk.vtkPolyDataMapper()
@@ -178,8 +167,21 @@ def visualize_maze(VecCubos, VecCaminosCiegos):
     main_path_actor = vtk.vtkActor()
     main_path_actor.SetMapper(mapper)
     main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
+
+    # Create a VTK renderer
+    renderer = vtk.vtkRenderer()
+    renderer.SetBackground(0.3, 0.3, 0.3)  # Background color
+
+    # Create a VTK render window
+    render_window = vtk.vtkRenderWindow()
+    render_window.AddRenderer(renderer)
+    render_window.SetWindowName("Laberith")
+
+    # Create a VTK render window interactor
+    render_window_interactor = vtk.vtkRenderWindowInteractor()
+    render_window_interactor.SetRenderWindow(render_window)
     renderer.AddActor(main_path_actor)
-    
+
     # Create an actor for the blind paths
     blind_path_actor = vtk.vtkActor()
     blind_path_actor.SetMapper(mapper)
@@ -196,49 +198,3 @@ VecCaminosCiegos, MatInfoCiegos = create_blind_paths(np.array(MatInfo))
 # plot_maze()
 
 visualize_maze(VecCubos, VecCaminosCiegos)
-
-# def create_cube_actor(vertices):
-#     # Create the cube points
-#     points = vtk.vtkPoints()
-#     for vertex in vertices:
-#         points.InsertNextPoint(vertex)
-
-#     # Define the cube connectivity
-#     cube = vtk.vtkCellArray()
-#     cube.InsertNextCell(8)
-#     for i in range(8):
-#         cube.InsertCellPoint(i)
-
-#     # Create the cube polydata
-#     cubePolyData = vtk.vtkPolyData()
-#     cubePolyData.SetPoints(points)
-#     cubePolyData.SetPolys(cube)
-
-#     # Map the cube data to graphics primitives
-#     mapper = vtk.vtkPolyDataMapper()
-#     mapper.SetInputData(cubePolyData)
-
-#     # Create an actor for visualization
-#     actor = vtk.vtkActor()
-#     actor.SetMapper(mapper)
-#     return actor
-
-# # Create a renderer and a render window
-# renderer = vtk.vtkRenderer()
-# renderWindow = vtk.vtkRenderWindow()
-# renderWindow.AddRenderer(renderer)
-
-# # Create a render window interactor for interactivity
-# renderWindowInteractor = vtk.vtkRenderWindowInteractor()
-# renderWindowInteractor.SetRenderWindow(renderWindow)
-
-# # Add the cubes to the renderer
-# for cube_vertices in VecCubos + VecCaminosCiegos:
-#     actor = create_cube_actor(cube_vertices)
-#     renderer.AddActor(actor)
-
-# # Start the rendering loop
-# renderWindow.Render()
-# renderWindowInteractor.Start()
-
-

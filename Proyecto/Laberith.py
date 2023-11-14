@@ -245,68 +245,47 @@ def visualize_maze(VecCubos, VecCaminosCiegos):
 
     render_window_interactor = vtk.vtkRenderWindowInteractor()
     render_window_interactor.SetRenderWindow(render_window)
-    # render_window_interactor.AddObserver("KeyPressEvent", keypress_callback)
-    # render_window_interactor.AddObserver("KeyPressEvent", lambda obj, event: keypress_callback(obj, event, renderer)) 
-    render_window_interactor.AddObserver("KeyPressEvent", lambda obj, event: keypress_callback(obj, event, renderer, render_window)) 
-    xor_function = vtk.vtkImplicitBoolean()
-    # xor_function.SetOperationTypeToXor()
-
+    # render_window_interactor.AddObserver("KeyPressEvent", lambda obj, event: keypress_callback(obj, event, renderer, render_window)) 
+    appendFilterCaminosCiegos = vtk.vtkAppendPolyData()
     for cube_vertices in VecCaminosCiegos:
-        xor_function.AddFunction(create_vtk_cube(cube_vertices))
+        cube = create_vtk_cube(cube_vertices)
+        if cube.GetNumberOfPoints() >0:
+            appendFilterCaminosCiegos.AddInputData(cube)
+        else:
+            print(cube)
+    appendFilterCubos = vtk.vtkAppendPolyData()
     for cube_vertices in VecCubos:
-        xor_function.AddFunction(create_vtk_cube(cube_vertices))
+        cube = create_vtk_cube(cube_vertices)
+        if cube.GetNumberOfPoints()> 0:
+            appendFilterCubos.AddInputData(cube)
+        
+
+    Union_filter = vtk.vtkBooleanOperationPolyDataFilter()
+    Union_filter.SetOperationToUnion()
+    Union_filter.SetInputData(0,appendFilterCubos.GetOutput())
+    Union_filter.SetInputData(1,appendFilterCaminosCiegos.GetOutput())
+    Union_filter.Update()
+
+    Intersection_filter = vtk.vtkBooleanOperationPolyDataFilter()
+    Intersection_filter.SetOperationToIntersection()
+    Intersection_filter.SetInputData(0,appendFilterCubos.GetOutput())
+    Intersection_filter.SetInputData(1,appendFilterCaminosCiegos.GetOutput())
+    Intersection_filter.Update()
+
+    Difference_filter = vtk.vtkBooleanOperationPolyDataFilter()
+    Difference_filter.SetOperationToDifference()
+    Difference_filter.SetInputData(0,appendFilterCubos.GetOutput())
+    Difference_filter.SetInputData(1,appendFilterCaminosCiegos.GetOutput())
+    Difference_filter.Update()
 
     xor_mapper = vtk.vtkPolyDataMapper()
-    xor_mapper.SetInputConnection(xor_function.GetOutputPort())
-
+    xor_mapper.SetInputConnection(Difference_filter.GetOutputPort())
     xor_actor = vtk.vtkActor()
     xor_actor.SetMapper(xor_mapper)
-    xor_actor.SetProperty().SetColor(1.0,1.0,0)
-    
+    xor_actor.GetProperty().SetColor(0,1,0)
+
     renderer.AddActor(xor_actor)
-    # # Create a mapper for the blind paths
-    # blind_path_mapper = vtk.vtkPolyDataMapper()
-    # appendFilterBlind = vtk.vtkAppendPolyData()
 
-    # filter = vtk.vtkBooleanOperationPolyDataFilter()
-    # filter.SetOperationToDifference()
-    # for cube_vertices in VecCaminosCiegos:
-    #     xor_function.AddFunction(create_vtk_cube(cube_vertices))
-    # filter.SetInputData(0, appendFilterBlind.GetOutput())
-    # # filter.SetInputData()
-    # main_path_mapper.SetInputConnection(filter.GetOutputPort())
-    # blind_path_mapper.SetInputConnection(appendFilterBlind.GetOutputPort())
-
-    # # Create an actor for the blind paths
-    # blind_path_actor = vtk.vtkActor()
-    # blind_path_actor.SetMapper(blind_path_mapper)
-    # blind_path_actor.GetProperty().SetColor(0.0, 0.0, 1.0)  # Blue color
-    # renderer.AddActor(blind_path_actor)
-
-    # # Create a mapper for the main path
-    # main_path_mapper = vtk.vtkPolyDataMapper()
-    # appendFilterMain = vtk.vtkAppendPolyData()
-    # filter = vtk.vtkBooleanOperationPolyDataFilter()
-    # filter.SetOperationToDifference()
-    # for cube_vertices in VecCubos:
-    #     appendFilterMain.AddInputData(create_vtk_cube(cube_vertices))
-
-    # filter.SetInputData(appendFilterMain.GetOutput())
-    # main_path_mapper.SetInputConnection(filter.GetOutputPort())
-
-    # # Create an actor for the main path
-    # main_path_actor = vtk.vtkActor()
-    # main_path_actor.SetMapper(main_path_mapper)
-    # main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
-    # renderer.AddActor(main_path_actor)
-    # # Set the initial camera view
-    # # start_position = VecCubos[0][0]  # Assuming the first cube's first vertex is the start
-    # # set_initial_camera_view(renderer, start_position)
-    # # Start the visualization
-
-    # renderer.GetActiveCamera().Azimuth(30)
-    # renderer.GetActiveCamera().Elevation(30)
-    # renderer.GetActiveCamera().Zoom(1.0)
     render_window.Render()
     render_window_interactor.Start()
 

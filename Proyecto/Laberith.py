@@ -67,8 +67,9 @@ def crea_camino_cubos(initial_direction, VecCubos, num_cubo, NCubos, is_blind_pa
     return VecCubos, MatInfo
 
 def create_main_path():
-    initial_direction = random_direction()
-    return crea_camino_cubos(initial_direction, [V_CUBO_UNIT], 0, LONG_LAB)
+    # initial_direction = random_direction()
+    # return crea_camino_cubos(initial_direction, [V_CUBO_UNIT], 0, LONG_LAB)
+    return crea_camino_cubos(3, [V_CUBO_UNIT], 0, LONG_LAB)
 
 def create_blind_paths(M):
     v_aleat = np.random.randint(0, LONG_LAB, size=N_CAMINOS_CIEGOS)
@@ -148,46 +149,164 @@ def create_vtk_cube(cube_vertices):
 
     return cube
 
+def keypress_callback(obj, event, renderer, render_window):  # Add render_window as an argument
+    key = obj.GetKeySym()
+    camera = renderer.GetActiveCamera()
+
+    move_speed = 0.5  # Adjust this value as needed
+    if key == "Up":
+        # camera.Pitch(10)
+
+        position = camera.GetPosition()
+        focal_point = camera.GetFocalPoint()
+        new_position = [position[0] + (focal_point[0] - position[0]) * move_speed,
+                        position[1] + (focal_point[1] - position[1]) * move_speed,
+                        position[2] + (focal_point[2] - position[2]) * move_speed]
+        camera.SetPosition(new_position)
+    elif key == "Down":
+        camera.Pitch(-10)
+    elif key == "Left":
+        camera.Yaw(10)
+    elif key == "Right":
+        camera.Yaw(-10)
+    elif key == "k":
+        camera.Dolly(1.1)
+    elif key == "j":
+        camera.Dolly(0.9)
+
+    renderer.ResetCameraClippingRange()
+    render_window.Render()
+
+
+# def keypress_callback(obj, event, renderer, render_window):
+#     key = obj.GetKeySym()
+#     camera = renderer.GetActiveCamera()
+#     move_speed = 0.5  # Adjust this value as needed
+
+#     if key == "Up":
+#         # Move forward along the camera's view direction
+#         position = camera.GetPosition()
+#         focal_point = camera.GetFocalPoint()
+#         new_position = [position[0] + (focal_point[0] - position[0]) * move_speed,
+#                         position[1] + (focal_point[1] - position[1]) * move_speed,
+#                         position[2] + (focal_point[2] - position[2]) * move_speed]
+        
+#         # Check for collision (basic)
+#         if not is_inside_wall(new_position):
+#             camera.SetPosition(new_position)
+#     elif key == "Down":
+#         # Move backward
+#         position = camera.GetPosition()
+#         focal_point = camera.GetFocalPoint()
+#         new_position = [position[0] - (focal_point[0] - position[0]) * move_speed,
+#                         position[1] - (focal_point[1] - position[1]) * move_speed,
+#                         position[2] - (focal_point[2] - position[2]) * move_speed]
+        
+#         # Check for collision (basic)
+#         if not is_inside_wall(new_position):
+#             camera.SetPosition(new_position)
+#     # ... [Handle other keys]
+
+#     renderer.ResetCameraClippingRange()
+#     render_window.Render()
+
+# def is_inside_wall(position):
+#     # Basic collision detection
+#     # Check if the given position is inside any of the maze walls
+#     # This is a placeholder function; you'll need to implement the actual collision detection
+#     return False
+
+def set_initial_camera_view(renderer, start_position):
+    # Get the active camera
+    camera = renderer.GetActiveCamera()
+    
+    # Set the camera's position just above the start of the maze
+    camera.SetPosition(start_position[0], start_position[1], start_position[2] + 5)  # +5 to be above the maze
+    
+    # Set the focal point to the start of the maze
+    camera.SetFocalPoint(start_position)
+    
+    # Set the up direction to be the Z-axis
+    camera.SetViewUp(0, 0, 1)
+    
+    # Adjust the view angle for a wider perspective if needed
+    # camera.SetViewAngle(45)
+    
+    # Update the renderer's viewport
+    renderer.ResetCamera()
+
 def visualize_maze(VecCubos, VecCaminosCiegos):
     # Create a VTK renderer
     renderer = vtk.vtkRenderer()
     renderer.SetBackground(0.1, 0.1, 0.1)  # Background color
-
     # Create a VTK render window
     render_window = vtk.vtkRenderWindow()
     render_window.AddRenderer(renderer)
 
-    # Create a VTK render window interactor
     render_window_interactor = vtk.vtkRenderWindowInteractor()
     render_window_interactor.SetRenderWindow(render_window)
+    # render_window_interactor.AddObserver("KeyPressEvent", keypress_callback)
+    # render_window_interactor.AddObserver("KeyPressEvent", lambda obj, event: keypress_callback(obj, event, renderer)) 
+    render_window_interactor.AddObserver("KeyPressEvent", lambda obj, event: keypress_callback(obj, event, renderer, render_window)) 
+    xor_function = vtk.vtkImplicitBoolean()
+    # xor_function.SetOperationTypeToXor()
 
-
-    # Create a mapper for the blind paths
-    blind_path_mapper = vtk.vtkPolyDataMapper()
-    appendFilterBlind = vtk.vtkAppendPolyData()
     for cube_vertices in VecCaminosCiegos:
-        appendFilterBlind.AddInputData(create_vtk_cube(cube_vertices))
-    blind_path_mapper.SetInputConnection(appendFilterBlind.GetOutputPort())
-
-    # Create an actor for the blind paths
-    blind_path_actor = vtk.vtkActor()
-    blind_path_actor.SetMapper(blind_path_mapper)
-    blind_path_actor.GetProperty().SetColor(0.0, 0.0, 1.0)  # Blue color
-    renderer.AddActor(blind_path_actor)
-
-    # Create a mapper for the main path
-    main_path_mapper = vtk.vtkPolyDataMapper()
-    appendFilterMain = vtk.vtkAppendPolyData()
+        xor_function.AddFunction(create_vtk_cube(cube_vertices))
     for cube_vertices in VecCubos:
-        appendFilterMain.AddInputData(create_vtk_cube(cube_vertices))
-    main_path_mapper.SetInputConnection(appendFilterMain.GetOutputPort())
+        xor_function.AddFunction(create_vtk_cube(cube_vertices))
 
-    # Create an actor for the main path
-    main_path_actor = vtk.vtkActor()
-    main_path_actor.SetMapper(main_path_mapper)
-    main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
-    renderer.AddActor(main_path_actor)
-    # Start the visualization
+    xor_mapper = vtk.vtkPolyDataMapper()
+    xor_mapper.SetInputConnection(xor_function.GetOutputPort())
+
+    xor_actor = vtk.vtkActor()
+    xor_actor.SetMapper(xor_mapper)
+    xor_actor.SetProperty().SetColor(1.0,1.0,0)
+    
+    renderer.AddActor(xor_actor)
+    # # Create a mapper for the blind paths
+    # blind_path_mapper = vtk.vtkPolyDataMapper()
+    # appendFilterBlind = vtk.vtkAppendPolyData()
+
+    # filter = vtk.vtkBooleanOperationPolyDataFilter()
+    # filter.SetOperationToDifference()
+    # for cube_vertices in VecCaminosCiegos:
+    #     xor_function.AddFunction(create_vtk_cube(cube_vertices))
+    # filter.SetInputData(0, appendFilterBlind.GetOutput())
+    # # filter.SetInputData()
+    # main_path_mapper.SetInputConnection(filter.GetOutputPort())
+    # blind_path_mapper.SetInputConnection(appendFilterBlind.GetOutputPort())
+
+    # # Create an actor for the blind paths
+    # blind_path_actor = vtk.vtkActor()
+    # blind_path_actor.SetMapper(blind_path_mapper)
+    # blind_path_actor.GetProperty().SetColor(0.0, 0.0, 1.0)  # Blue color
+    # renderer.AddActor(blind_path_actor)
+
+    # # Create a mapper for the main path
+    # main_path_mapper = vtk.vtkPolyDataMapper()
+    # appendFilterMain = vtk.vtkAppendPolyData()
+    # filter = vtk.vtkBooleanOperationPolyDataFilter()
+    # filter.SetOperationToDifference()
+    # for cube_vertices in VecCubos:
+    #     appendFilterMain.AddInputData(create_vtk_cube(cube_vertices))
+
+    # filter.SetInputData(appendFilterMain.GetOutput())
+    # main_path_mapper.SetInputConnection(filter.GetOutputPort())
+
+    # # Create an actor for the main path
+    # main_path_actor = vtk.vtkActor()
+    # main_path_actor.SetMapper(main_path_mapper)
+    # main_path_actor.GetProperty().SetColor(1.0, 0.0, 0.0)  # Red color
+    # renderer.AddActor(main_path_actor)
+    # # Set the initial camera view
+    # # start_position = VecCubos[0][0]  # Assuming the first cube's first vertex is the start
+    # # set_initial_camera_view(renderer, start_position)
+    # # Start the visualization
+
+    # renderer.GetActiveCamera().Azimuth(30)
+    # renderer.GetActiveCamera().Elevation(30)
+    # renderer.GetActiveCamera().Zoom(1.0)
     render_window.Render()
     render_window_interactor.Start()
 

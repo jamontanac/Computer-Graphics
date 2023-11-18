@@ -34,7 +34,7 @@ def create_cube(center, size):
 
     return vertices, faces
 
-def create_multiple_cubes(start_center, size, n):
+def create_random_cubes(start_center, size, n):
     """
     Create 'n' cubes, each with edge length 'size'.
     Each new cube is placed in a random direction relative to the previous cube.
@@ -42,38 +42,23 @@ def create_multiple_cubes(start_center, size, n):
     """
     all_vertices = []
     all_faces = []
-    last_directions = []
+    directions = {"x":(1, 0, 0), "-x":(-1, 0, 0), "y":(0, 1, 0), "-y": (0, -1, 0), "z":(0, 0, 1), "-z":(0, 0, -1)}
+    cube_directions = {}
 
     for i in range(n):
-        if i == 0:
-            center = start_center # we center it where we want
-        else:
-            possible_directions = ['x', '-x', 'y', '-y', 'z', '-z']
-            for direction in last_directions:
-                possible_directions.remove(direction) # we make sure we do not select the same direction than before
-            #here we never go backwards
-
-            direction = random.choice(possible_directions)# we randomly select a direction
-            last_directions = [direction]
-
-            #calculate the center for the new cube given the direction
-            if direction == 'x':
-                offset = np.array([size, 0, 0])
-            elif direction == '-x':
-                offset = np.array([-size, 0, 0])
-            elif direction == 'y':
-                offset = np.array([0, size, 0])
-            elif direction == '-y':
-                offset = np.array([0, -size, 0])
-            elif direction == 'z':
-                offset = np.array([0, 0, size])
-            elif direction == '-z':
-                offset = np.array([0, 0, -size])
-
-            center = all_vertices[-1][0]+ size/2 + offset
-        vertices, faces = create_cube(center, size)
+        vertices, faces = create_cube(start_center, size)
         all_vertices.append(vertices)
-        all_faces.append(faces + (len(all_vertices) - 1 )*8)
+        all_faces.append(faces + (len(all_vertices)  - 1)*8)
+        cube_directions[i] = []
+        if i>0:
+            opposite_direction = {v:k for k,v in directions.items()}[tuple(direction)]
+            cube_directions[i-1].append(opposite_direction)
+        if i< n-1:
+            available_directions = {k:v for k, v in directions.items() if k not in cube_directions[i]}
+            direction_key = random.choice(list(available_directions.keys()))
+            direction = available_directions[direction_key]
+        
+            start_center = np.array(start_center) + np.array(direction)*size
 
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)
@@ -81,7 +66,7 @@ def create_multiple_cubes(start_center, size, n):
     return combined_vertices, combined_faces
 
 n = 10  # Number of cubes
-vertices, faces = create_multiple_cubes(start_center=[0, 0, 0], size=2, n=n)
+vertices, faces = create_random_cubes(start_center=[0, 0, 0], size=2, n=n)
 
 
 cube = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))

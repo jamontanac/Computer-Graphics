@@ -114,7 +114,6 @@ def plot_maze():
         cube = Poly3DCollection(cube_vertices[CARAS], edgecolor='k', facecolor='red')
         ax.add_collection3d(cube)
 
-    
     x_min, x_max, y_min, y_max, z_min, z_max = compute_axis_limits(VecCubos + VecCaminosCiegos)
     ax.set_xlim([x_min, x_max])
     ax.set_ylim([y_min, y_max])
@@ -177,45 +176,6 @@ def keypress_callback(obj, event, renderer, render_window):  # Add render_window
     renderer.ResetCameraClippingRange()
     render_window.Render()
 
-
-# def keypress_callback(obj, event, renderer, render_window):
-#     key = obj.GetKeySym()
-#     camera = renderer.GetActiveCamera()
-#     move_speed = 0.5  # Adjust this value as needed
-
-#     if key == "Up":
-#         # Move forward along the camera's view direction
-#         position = camera.GetPosition()
-#         focal_point = camera.GetFocalPoint()
-#         new_position = [position[0] + (focal_point[0] - position[0]) * move_speed,
-#                         position[1] + (focal_point[1] - position[1]) * move_speed,
-#                         position[2] + (focal_point[2] - position[2]) * move_speed]
-        
-#         # Check for collision (basic)
-#         if not is_inside_wall(new_position):
-#             camera.SetPosition(new_position)
-#     elif key == "Down":
-#         # Move backward
-#         position = camera.GetPosition()
-#         focal_point = camera.GetFocalPoint()
-#         new_position = [position[0] - (focal_point[0] - position[0]) * move_speed,
-#                         position[1] - (focal_point[1] - position[1]) * move_speed,
-#                         position[2] - (focal_point[2] - position[2]) * move_speed]
-        
-#         # Check for collision (basic)
-#         if not is_inside_wall(new_position):
-#             camera.SetPosition(new_position)
-#     # ... [Handle other keys]
-
-#     renderer.ResetCameraClippingRange()
-#     render_window.Render()
-
-# def is_inside_wall(position):
-#     # Basic collision detection
-#     # Check if the given position is inside any of the maze walls
-#     # This is a placeholder function; you'll need to implement the actual collision detection
-#     return False
-
 def set_initial_camera_view(renderer, start_position):
     # Get the active camera
     camera = renderer.GetActiveCamera()
@@ -251,8 +211,6 @@ def visualize_maze(VecCubos, VecCaminosCiegos):
         cube = create_vtk_cube(cube_vertices)
         if cube.GetNumberOfPoints() >0:
             appendFilterCaminosCiegos.AddInputData(cube)
-        else:
-            print(cube)
     appendFilterCubos = vtk.vtkAppendPolyData()
     for cube_vertices in VecCubos:
         cube = create_vtk_cube(cube_vertices)

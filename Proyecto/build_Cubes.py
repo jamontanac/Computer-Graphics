@@ -81,30 +81,26 @@ def create_random_cubes(start_center, size, n):
 
             opposite_direction = {"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[previous_direction]
             faces_to_remove.extend(get_faces_to_remove(i,opposite_direction))
-            # faces = remove_internal_faces(faces, opposite_direction,i)
-            # previous_faces = remove_internal_faces(all_faces[-1], previous_direction,i-1)
-            # all_faces[-1] = previous_faces
-            # cube_directions[i-1].append(opposite_direction)
-            # faces = remove_internal_faces(faces,opposite_direction)
         
         # cube_directions[i] = []
         if i< n-1:
-            # available_directions = {k:v for k, v in directions.items() if k not in cube_directions[i]}
             available_directions = list(directions.keys())
             if i in cube_directions:
-                # Ensure not to select the opposite direction of the last cube
                 available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i]])
             direction_key = random.choice(available_directions)
             cube_directions[i]=direction_key
             direction = directions[direction_key]
+
             start_center = np.array(start_center) + np.array(direction)*size
+
     print(cube_directions)
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)
 
+    combined_faces = np.delete(combined_faces,faces_to_remove,axis=0)
     return combined_vertices, combined_faces
 
-n = 10  # Number of cubes
+n = 30  # Number of cubes
 vertices, faces = create_random_cubes(start_center=[0, 0, 0], size=2, n=n)
 
 

@@ -8,32 +8,34 @@ def create_cube(center, size):
     """
     # Define the 8 vertices of the cube relative to the center
     vertices = np.array([
-        [center[0] - size / 2, center[1] - size / 2, center[2] - size / 2],
-        [center[0] + size / 2, center[1] - size / 2, center[2] - size / 2],
-        [center[0] + size / 2, center[1] + size / 2, center[2] - size / 2],
-        [center[0] - size / 2, center[1] + size / 2, center[2] - size / 2],
-        [center[0] - size / 2, center[1] - size / 2, center[2] + size / 2],
-        [center[0] + size / 2, center[1] - size / 2, center[2] + size / 2],
-        [center[0] + size / 2, center[1] + size / 2, center[2] + size / 2],
-        [center[0] - size / 2, center[1] + size / 2, center[2] + size / 2]])
+        [center[0] - size / 2, center[1] - size / 2, center[2] - size / 2], # 0
+        [center[0] + size / 2, center[1] - size / 2, center[2] - size / 2], # 1
+        [center[0] + size / 2, center[1] + size / 2, center[2] - size / 2], # 2
+        [center[0] - size / 2, center[1] + size / 2, center[2] - size / 2], # 3
+        [center[0] - size / 2, center[1] - size / 2, center[2] + size / 2], # 4
+        [center[0] + size / 2, center[1] - size / 2, center[2] + size / 2], # 5
+        [center[0] + size / 2, center[1] + size / 2, center[2] + size / 2], # 6
+        [center[0] - size / 2, center[1] + size / 2, center[2] + size / 2]]) # 7
 
     # Define the 12 triangles composing the cube
     faces = np.array([
-        [0, 3, 1],
-        [1, 3, 2],
-        [4, 5, 6],
-        [4, 6, 7],
-        [0, 4, 7],
-        [0, 7, 3],
-        [5, 1, 2],
-        [5, 2, 6],
-        [2, 3, 6],
-        [3, 7, 6],
-        [0, 1, 5],
-        [0, 5, 4]])
+        [0, 3, 1], [1, 3, 2], # Back
+        [4, 5, 6], [4, 6, 7], # Front
+        [0, 4, 7], [0, 7, 3], # Left
+        [5, 1, 2], [5, 2, 6], # Right
+        [2, 3, 6], [3, 7, 6], # Top
+        [0, 1, 5], [0, 5, 4]]) # Buttom
 
     return vertices, faces
+def remove_joint_faces(faces, direction_key):
+    if direction_key == "x" or direction_key == "-x":
+        faces_to_remove = [4, 5, 6, 7]
+    elif direction_key == "y" or direction_key == "-y":
+        faces_to_remove = [8, 9, 10, 11]
+    else:  # z or -z
+        faces_to_remove = [0, 1, 2, 3]
 
+    return np.array([face for i, face in enumerate(faces) if i not in faces_to_remove])
 def create_random_cubes(start_center, size, n):
     """
     Create 'n' cubes, each with edge length 'size'.
@@ -42,7 +44,9 @@ def create_random_cubes(start_center, size, n):
     """
     all_vertices = []
     all_faces = []
-    directions = {"x":(1, 0, 0), "-x":(-1, 0, 0), "y":(0, 1, 0), "-y": (0, -1, 0), "z":(0, 0, 1), "-z":(0, 0, -1)}
+    directions = {"x":(1, 0, 0), "-x":(-1, 0, 0),
+                  "y":(0, 1, 0), "-y": (0, -1, 0),
+                  "z":(0, 0, 1), "-z":(0, 0, -1)}
     cube_directions = {}
 
     for i in range(n):
@@ -50,16 +54,19 @@ def create_random_cubes(start_center, size, n):
         all_vertices.append(vertices)
         all_faces.append(faces + (len(all_vertices)  - 1)*8)
         cube_directions[i] = []
+
         if i>0:
             opposite_direction = {v:k for k,v in directions.items()}[tuple(direction)]
             cube_directions[i-1].append(opposite_direction)
+            all_faces[i-1] = remove_joint_faces(all_faces[i-1],opposite_direction)
         if i< n-1:
             available_directions = {k:v for k, v in directions.items() if k not in cube_directions[i]}
             direction_key = random.choice(list(available_directions.keys()))
             direction = available_directions[direction_key]
         
             start_center = np.array(start_center) + np.array(direction)*size
-
+            faces = remove_joint_faces(faces,direction_key)
+    print(cube_directions)
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)
 

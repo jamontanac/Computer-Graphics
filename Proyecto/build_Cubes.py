@@ -18,24 +18,45 @@ def create_cube(center, size):
         [center[0] - size / 2, center[1] + size / 2, center[2] + size / 2]]) # 7
 
     # Define the 12 triangles composing the cube
+    # faces = np.array([
+    #     [0, 3, 1], [1, 3, 2], # Back
+    #     [4, 5, 6], [4, 6, 7], # Front
+    #     [0, 4, 7], [0, 7, 3], # Left
+    #     [5, 1, 2], [5, 2, 6], # Right
+    #     [2, 3, 6], [3, 7, 6], # Top
+    #     [0, 1, 5], [0, 5, 4]]) # Buttom
     faces = np.array([
-        [0, 3, 1], [1, 3, 2], # Back
-        [4, 5, 6], [4, 6, 7], # Front
-        [0, 4, 7], [0, 7, 3], # Left
-        [5, 1, 2], [5, 2, 6], # Right
-        [2, 3, 6], [3, 7, 6], # Top
-        [0, 1, 5], [0, 5, 4]]) # Buttom
+        [0, 3, 1],  # -z face (0)
+        [1, 3, 2],  # -z face (1)
+        [4, 5, 6],  # +z face (2)
+        [4, 6, 7],  # +z face (3)
+        [0, 4, 7],  # -x face (4)
+        [0, 7, 3],  # -x face (5)
+        [5, 1, 2],  # +x face (6)
+        [5, 2, 6],  # +x face (7)
+        [2, 3, 6],  # +y face (8)
+        [3, 7, 6],  # +y face (9)
+        [0, 1, 5],  # -y face (10)
+        [0, 5, 4]]) # -y face (11)
 
     return vertices, faces
-def remove_joint_faces(faces, direction_key):
-    if direction_key == "x" or direction_key == "-x":
-        faces_to_remove = [4, 5, 6, 7]
-    elif direction_key == "y" or direction_key == "-y":
-        faces_to_remove = [8, 9, 10, 11]
-    else:  # z or -z
-        faces_to_remove = [0, 1, 2, 3]
 
-    return np.array([face for i, face in enumerate(faces) if i not in faces_to_remove])
+def get_faces_to_remove(cube_index, direction):
+    """
+    Remove the faces that are internal (in contact) based on the direction.
+    """
+    face_directions = {
+        "x": [6, 7],  # +x face indices
+        "-x": [4, 5],  # -x face indices
+        "y": [8, 9],  # +y face indices
+        "-y": [10, 11],  # -y face indices
+        "z": [2, 3],  # +z face indices
+        "-z": [0, 1] # -z face indices
+    }
+
+    faces_to_remove = [index +12*cube_index for index in face_directions[direction]]
+    return faces_to_remove 
+
 def create_random_cubes(start_center, size, n):
     """
     Create 'n' cubes, each with edge length 'size'.
@@ -44,28 +65,39 @@ def create_random_cubes(start_center, size, n):
     """
     all_vertices = []
     all_faces = []
+    faces_to_remove = []
     directions = {"x":(1, 0, 0), "-x":(-1, 0, 0),
                   "y":(0, 1, 0), "-y": (0, -1, 0),
                   "z":(0, 0, 1), "-z":(0, 0, -1)}
     cube_directions = {}
-
     for i in range(n):
         vertices, faces = create_cube(start_center, size)
         all_vertices.append(vertices)
         all_faces.append(faces + (len(all_vertices)  - 1)*8)
-        cube_directions[i] = []
 
         if i>0:
-            opposite_direction = {v:k for k,v in directions.items()}[tuple(direction)]
-            cube_directions[i-1].append(opposite_direction)
-            all_faces[i-1] = remove_joint_faces(all_faces[i-1],opposite_direction)
-        if i< n-1:
-            available_directions = {k:v for k, v in directions.items() if k not in cube_directions[i]}
-            direction_key = random.choice(list(available_directions.keys()))
-            direction = available_directions[direction_key]
+            previous_direction = cube_directions[i-1]
+            faces_to_remove.extend(get_faces_to_remove(i-1, previous_direction))
+
+            opposite_direction = {"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[previous_direction]
+            faces_to_remove.extend(get_faces_to_remove(i,opposite_direction))
+            # faces = remove_internal_faces(faces, opposite_direction,i)
+            # previous_faces = remove_internal_faces(all_faces[-1], previous_direction,i-1)
+            # all_faces[-1] = previous_faces
+            # cube_directions[i-1].append(opposite_direction)
+            # faces = remove_internal_faces(faces,opposite_direction)
         
+        # cube_directions[i] = []
+        if i< n-1:
+            # available_directions = {k:v for k, v in directions.items() if k not in cube_directions[i]}
+            available_directions = list(directions.keys())
+            if i in cube_directions:
+                # Ensure not to select the opposite direction of the last cube
+                available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i]])
+            direction_key = random.choice(available_directions)
+            cube_directions[i]=direction_key
+            direction = directions[direction_key]
             start_center = np.array(start_center) + np.array(direction)*size
-            faces = remove_joint_faces(faces,direction_key)
     print(cube_directions)
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)

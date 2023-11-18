@@ -17,14 +17,6 @@ def create_cube(center, size):
         [center[0] + size / 2, center[1] + size / 2, center[2] + size / 2], # 6
         [center[0] - size / 2, center[1] + size / 2, center[2] + size / 2]]) # 7
 
-    # Define the 12 triangles composing the cube
-    # faces = np.array([
-    #     [0, 3, 1], [1, 3, 2], # Back
-    #     [4, 5, 6], [4, 6, 7], # Front
-    #     [0, 4, 7], [0, 7, 3], # Left
-    #     [5, 1, 2], [5, 2, 6], # Right
-    #     [2, 3, 6], [3, 7, 6], # Top
-    #     [0, 1, 5], [0, 5, 4]]) # Buttom
     faces = np.array([
         [0, 3, 1],  # -z face (0)
         [1, 3, 2],  # -z face (1)
@@ -43,7 +35,7 @@ def create_cube(center, size):
 
 def get_faces_to_remove(cube_index, direction):
     """
-    Remove the faces that are internal (in contact) based on the direction.
+    Determine the indices of faces to be removed for a given cube and direction.
     """
     face_directions = {
         "x": [6, 7],  # +x face indices
@@ -60,8 +52,8 @@ def get_faces_to_remove(cube_index, direction):
 def create_random_cubes(start_center, size, n):
     """
     Create 'n' cubes, each with edge length 'size'.
-    Each new cube is placed in a random direction relative to the previous cube.
-    Returns the combined vertices and faces of all cubes.
+    Each new cube is placed in a random direction from the previous one.
+    Returns the combined vertices and faces of all cubes, and the faces to be removed.
     """
     all_vertices = []
     all_faces = []
@@ -110,4 +102,4 @@ for i, f in enumerate(faces):
         cube.vectors[i][j] = vertices[f[j]]
 
 
-cube.save('cube.stl')
+cube.save('Laberith.stl')

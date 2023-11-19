@@ -1,3 +1,4 @@
 subdirs(
+    LevelZero
     LevelOne
 )

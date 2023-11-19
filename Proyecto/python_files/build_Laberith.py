@@ -92,8 +92,8 @@ def create_random_cubes(start_center, size, n):
     combined_faces = np.delete(combined_faces,faces_to_remove,axis=0)
     return combined_vertices, combined_faces
 
-n = 30  # Number of cubes
-vertices, faces = create_random_cubes(start_center=[0, 0, 0], size=2, n=n)
+n = 50  # Number of cubes
+vertices, faces = create_random_cubes(start_center=[0, 0, 0], size=5, n=n)
 
 
 cube = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))

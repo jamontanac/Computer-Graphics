@@ -69,8 +69,8 @@ _loadScene( )
   auto room = this->_load_using_vtk( "LevelZero_resources/room.obj", "room" );
   auto bb = room->getBoundingBox( );
   auto cog = bb.getMaximum( ) + bb.getMinimum( );
-  cog *= 0.5;
-
+  cog *= 0;
+  std::cout<<cog<<std::endl;
   // Configure illumination
   this->m_SceneMgr->setAmbientLight( Ogre::ColourValue( 1, 1, 1 ) );
 

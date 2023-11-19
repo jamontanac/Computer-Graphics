@@ -62,7 +62,7 @@ def create_random_cubes(start_center, size, n):
     #               "y":(0, 1, 0), "-y": (0, -1, 0),
     #               "z":(0, 0, 1), "-z":(0, 0, -1)}
     directions = {"x":(1, 0, 0), "-x":(-1, 0, 0),
-                #   "y":(0, 1, 0), "-y": (0, -1, 0),
+                   "y":(0, 1, 0), "-y": (0, -1, 0),
                   "z":(0, 0, 1), "-z":(0, 0, -1)}
     cube_directions = {}
     for i in range(n):
@@ -81,8 +81,8 @@ def create_random_cubes(start_center, size, n):
             available_directions = list(directions.keys())
             if i in cube_directions:
                 available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i]])
-            direction_key = random.choice(available_directions)
-            cube_directions[i]=direction_key
+            direction_key = random.choices(available_directions,weights=[0.4,0.1,0,0,0.4,0.1],k=1)[0]
+            cube_directions[i] = direction_key
             direction = directions[direction_key]
 
             start_center = np.array(start_center) + np.array(direction)*size

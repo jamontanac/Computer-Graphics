@@ -58,8 +58,11 @@ def create_random_cubes(start_center, size, n):
     all_vertices = []
     all_faces = []
     faces_to_remove = []
+    # directions = {"x":(1, 0, 0), "-x":(-1, 0, 0),
+    #               "y":(0, 1, 0), "-y": (0, -1, 0),
+    #               "z":(0, 0, 1), "-z":(0, 0, -1)}
     directions = {"x":(1, 0, 0), "-x":(-1, 0, 0),
-                  "y":(0, 1, 0), "-y": (0, -1, 0),
+                #   "y":(0, 1, 0), "-y": (0, -1, 0),
                   "z":(0, 0, 1), "-z":(0, 0, -1)}
     cube_directions = {}
     for i in range(n):
@@ -70,7 +73,6 @@ def create_random_cubes(start_center, size, n):
         if i>0:
             previous_direction = cube_directions[i-1]
             faces_to_remove.extend(get_faces_to_remove(i-1, previous_direction))
-
             opposite_direction = {"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[previous_direction]
             faces_to_remove.extend(get_faces_to_remove(i,opposite_direction))
         

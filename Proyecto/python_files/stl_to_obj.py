@@ -1,35 +1,54 @@
 import vtk
 
-def convert_and_visualize_stl(stl_filename, obj_filename):
+def convert_stl_to_obj(stl_filename, obj_filename, texture_image):
     reader = vtk.vtkSTLReader()
     reader.SetFileName(stl_filename)
+    # compute normals
+    normals = vtk.vtkPolyDataNormals()
+    normals.SetInputConnection(reader.GetOutputPort())
+    normals.Update()
+    #texture
+    texture_reader = vtk.vtkPNGReader()
+    texture_reader.SetFileName(texture_image)
+    texture_reader.Update()
 
-    writer = vtk.vtkOBJWriter()
-    writer.SetFileName(obj_filename)
-    writer.SetInputConnection(reader.GetOutputPort())
-    writer.Write()
+    texture = vtk.vtkTexture()
+    texture.SetInputConnection(texture_reader.GetOutputPort())
+    texture_coordinates = vtk.vtkTextureMapToPlane()
+    texture_coordinates.SetInputConnection(normals.GetOutputPort())
+    texture_coordinates.AutomaticPlaneGenerationOn()
+    texture_coordinates.Update()
 
     mapper = vtk.vtkPolyDataMapper()
-    mapper.SetInputConnection(reader.GetOutputPort())
+    mapper.SetInputConnection(texture_coordinates.GetOutputPort())
 
     actor = vtk.vtkActor()
     actor.SetMapper(mapper)
+    actor.SetTexture(texture)
 
-    renderer = vtk.vtkRenderer()
+    render = vtk.vtkRenderer()
     renderWindow = vtk.vtkRenderWindow()
-    renderWindow.AddRenderer(renderer)
-
+    renderWindow.AddRenderer(render)
     renderWindowInteractor = vtk.vtkRenderWindowInteractor()
     renderWindowInteractor.SetRenderWindow(renderWindow)
-
-    renderer.AddActor(actor)
-    renderer.SetBackground(0.1, 0.2, 0.3)  
-
+    render.AddActor(actor)
+    render.SetBackground(0.9,0,0)
     renderWindow.Render()
     renderWindowInteractor.Start()
 
-stl_file = 'Laberith.stl'  
-obj_file = 'room.obj'        
+    # renderWindow.SetRender(renderWindow)
 
-convert_and_visualize_stl(stl_file, obj_file)
+
+    writer = vtk.vtkOBJWriter()
+    writer.SetFileName(obj_filename)
+
+    writer.SetInputConnection(texture_coordinates.GetOutputPort())
+    writer.Write()
+
+
+stl_file = 'Laberith.stl'  
+obj_file = 'room.obj'
+texture_file = 'wall.png'        
+
+convert_stl_to_obj(stl_file, obj_file,texture_file)
 

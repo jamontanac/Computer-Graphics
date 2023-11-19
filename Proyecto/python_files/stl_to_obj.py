@@ -1,20 +1,35 @@
 import vtk
 
-def convert_stl_to_obj(stl_filename, obj_filename):
-    # Read the STL file
+def convert_and_visualize_stl(stl_filename, obj_filename):
     reader = vtk.vtkSTLReader()
     reader.SetFileName(stl_filename)
-    
-    # Write to an OBJ file
+
     writer = vtk.vtkOBJWriter()
     writer.SetFileName(obj_filename)
     writer.SetInputConnection(reader.GetOutputPort())
-    
-    # Perform the conversion
     writer.Write()
 
-# Example usage
-stl_file = 'Laberith.stl'  # Replace with your STL file path
-obj_file = 'room.obj'        # Desired output OBJ file path
+    mapper = vtk.vtkPolyDataMapper()
+    mapper.SetInputConnection(reader.GetOutputPort())
 
-convert_stl_to_obj(stl_file, obj_file)
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)
+
+    renderer = vtk.vtkRenderer()
+    renderWindow = vtk.vtkRenderWindow()
+    renderWindow.AddRenderer(renderer)
+
+    renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+    renderWindowInteractor.SetRenderWindow(renderWindow)
+
+    renderer.AddActor(actor)
+    renderer.SetBackground(0.1, 0.2, 0.3)  
+
+    renderWindow.Render()
+    renderWindowInteractor.Start()
+
+stl_file = 'Laberith.stl'  
+obj_file = 'room.obj'        
+
+convert_and_visualize_stl(stl_file, obj_file)
+

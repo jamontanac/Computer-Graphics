@@ -97,12 +97,12 @@ def create_random_cubes(start_center, size, n):
 
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)
-
+    print(cubes_center)
     combined_faces = np.delete(combined_faces,faces_to_remove,axis=0)
     return combined_vertices, combined_faces
 
 def write_initial_stl(name,center,n):
-    vertices, faces = create_random_cubes(start_center=center, size=5, n=n)
+    vertices, faces = create_random_cubes(start_center=center, size=15, n=n)
 
 
     cube = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))

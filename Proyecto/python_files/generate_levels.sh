@@ -27,8 +27,10 @@ for level in 1 2 3; do
             z=0
         else
             # For other values of i, use random x and z
-            x=$((RANDOM % 20))
-            z=$((RANDOM % 20))
+            x=$(( (RANDOM % 10)- 10 ))
+            x=$(( (x * 5) % 15 ))
+            z=$(( (RANDOM % 10)-10 ))
+            z=$(( (z * 5) % 15 ))
         fi
         run_python_script "$level_folder" "laberinth_level${level}_${i}.stl" "${x}" 0 "${z}" "${length}" "laberinth_level${level}_${i}.obj"
     done

@@ -256,11 +256,11 @@ _loadScene( )
     auto sphere_node = root_node->createChildSceneNode("sphereNode" + std::to_string(i));
     sphere_node->scale(15, 15, 15);
 
-    // int x_sphere = dist(rng)*5;
-    // int z_sphere = dist(rng)*5;
-    int x_sphere = i*5;
-    int z_sphere = i*5;
-    sphere_node->setPosition(Ogre::Vector3(x_sphere, 1, z_sphere));
+    int x_sphere = dist(rng);
+    int z_sphere = dist(rng);
+    // int x_sphere = i*10;
+    // int z_sphere = i*10;
+    sphere_node->setPosition(Ogre::Vector3(x_sphere, 0.5, z_sphere));
     sphere_node->attachObject(sphere_ent);
 
     // Add the node to the vector

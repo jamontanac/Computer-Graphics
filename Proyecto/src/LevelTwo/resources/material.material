@@ -9,7 +9,7 @@ material main_path
 			diffuse 0.3 0.3 0.3 1
             texture_unit
                 {
-                    texture LevelZero_resources/wood.png
+                    texture LevelTwo_resources/wood.png
                     scale 0.3 0.3
                 }
 		}
@@ -28,7 +28,7 @@ material second_path
 			diffuse 0.3 0.3 0.3 1
 			texture_unit
 			{
-					texture LevelZero_resources/neon.png
+					texture LevelTwo_resources/neon.png
 					scale 0.3 0.3
 			}
 		}
@@ -46,13 +46,193 @@ material third_path
 			diffuse 0.3 0.3 0.3 1
 			texture_unit
 			{
-					texture LevelZero_resources/neon2.png
+					texture LevelTwo_resources/black.png
 					scale 0.3 0.3
 			}
 		}
 	}
 }
-material sphere
+material sphere0
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere1
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere2
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere3
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere4
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere5
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere6
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere7
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere8
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere9
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere10
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere11
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere12
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere13
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere14
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.7 0.1 0.5
+			diffuse 0.7 0.1 0.5 1
+		}
+	}
+}
+material sphere15
 {
 	receive_shadows on
 	technique

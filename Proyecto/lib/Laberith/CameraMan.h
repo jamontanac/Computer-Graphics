@@ -50,6 +50,8 @@ namespace Laberith
     bool m_Left      { false };
     bool m_Right     { false };
     bool m_Fast      { false };
+    bool m_Up        { false };
+    bool m_Down      { false };
 
     Ogre::Real m_Top { 1 };
   };

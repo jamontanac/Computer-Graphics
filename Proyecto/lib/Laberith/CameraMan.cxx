@@ -74,6 +74,18 @@ frameRendered( const Ogre::FrameEvent& evt )
     if( this->m_BoundingBox.intersects( p ) )
       this->m_Camera->setPosition( p );
   } // end if
+  if (this->m_Up || this->m_Down)
+  {
+    Ogre::Real verticalSpeed = this->m_Top * Ogre::Real(evt.timeSinceLastFrame);
+    verticalSpeed *= Ogre::Real((this->m_Fast) ? 40 : 15);
+    Ogre::Real verticalMove = verticalSpeed * Ogre::Real((this->m_Up) ? 1 : -1);
+
+    Ogre::Vector3 currentPosition = this->m_Camera->getPosition();
+    currentPosition.y += verticalMove;
+
+    if (this->m_BoundingBox.intersects(currentPosition))
+      this->m_Camera->setPosition(currentPosition);
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -87,6 +99,8 @@ keyPressed( const OgreBites::KeyboardEvent& evt )
   case 'a': case OgreBites::SDLK_LEFT : this->m_Left      = true; break;
   case 'd': case OgreBites::SDLK_RIGHT: this->m_Right     = true; break;
   case OgreBites::SDLK_LSHIFT         : this->m_Fast      = true; break;
+  case 'e'                            : this->m_Up        = true; break;
+  case 'q'                            : this->m_Down      = true; break;
   default: break;
   } // end switch
   return( this->Superclass::keyPressed( evt ) );
@@ -103,6 +117,9 @@ keyReleased( const OgreBites::KeyboardEvent& evt )
   case 'a': case OgreBites::SDLK_LEFT : this->m_Left      = false; break;
   case 'd': case OgreBites::SDLK_RIGHT: this->m_Right     = false; break;
   case OgreBites::SDLK_LSHIFT         : this->m_Fast      = false; break;
+  case 'e'                            : this->m_Up        = false; break;
+  case 'q'                            : this->m_Down      = false; break;
+
   default: break;
   } // end switch
   return( this->Superclass::keyPressed( evt ) );

@@ -1,5 +1,5 @@
 subdirs(
     LevelZero
-    # LevelOne
-    # LevelTwo
+    LevelOne
+    LevelTwo
 )

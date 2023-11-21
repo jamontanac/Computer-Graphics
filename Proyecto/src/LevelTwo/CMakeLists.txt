@@ -14,5 +14,5 @@ elseif(APPLE)
   set(_t MACOSX_BUNDLE)
 endif()
 
-add_executable(LevelZero ${_t} LevelZero.cxx)
-target_link_libraries(LevelZero Laberith)
+add_executable(LevelTwo ${_t} LevelTwo.cxx)
+target_link_libraries(LevelTwo Laberith)

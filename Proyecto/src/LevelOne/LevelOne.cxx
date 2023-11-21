@@ -13,12 +13,12 @@
 
 /**
  */
-class LevelZero
+class LevelOne
   : public Laberith::BaseApplication
 {
 public:
-  LevelZero( const std::string& work_dir );
-  virtual ~LevelZero( ) override;
+  LevelOne( const std::string& work_dir );
+  virtual ~LevelOne( ) override;
 
   // virtual bool keyPressed( const OgreBites::KeyboardEvent& evt ) override;
   virtual bool frameStarted( const Ogre::FrameEvent& evt ) override;
@@ -31,6 +31,8 @@ protected:
 
   Ogre::SceneNode* m_Sphere     { nullptr };
   btRigidBody*     m_SphereBody { nullptr };
+  std::vector<Ogre::SceneNode*> mSphereNodes;
+  std::vector<btRigidBody*> mSphereBodies;
   bool m_Simulating { true };
 
   btDefaultCollisionConfiguration* m_BTConf;
@@ -42,7 +44,7 @@ protected:
 };
 
 // -------------------------------------------------------------------------
-// bool LevelZero::
+// bool LevelOne::
 // keyPressed( const OgreBites::KeyboardEvent& evt )
 // {
 //   if( evt.keysym.sym == 'f' )
@@ -73,22 +75,22 @@ protected:
 int main( int argc, char** argv )
 {
   std::filesystem::path p( argv[ 0 ] );
-  LevelZero app( p.parent_path( ).string( ) );
+  LevelOne app( p.parent_path( ).string( ) );
   app.go( );
   return( EXIT_SUCCESS );
 }
 
 // -------------------------------------------------------------------------
-LevelZero::
-LevelZero( const std::string& work_dir )
-  : Laberith::BaseApplication( "LevelZero v1.0", "" )
+LevelOne::
+LevelOne( const std::string& work_dir )
+  : Laberith::BaseApplication( "LevelOne v1.0", "" )
 {
-  static char name_template[] = "tmp_LevelZero_XXXXXXXXX";
+  static char name_template[] = "tmp_LevelOne_XXXXXXXXX";
   char fname[ PATH_MAX ];
 
   std::stringstream contents;
   contents << "[General]" << std::endl;
-  contents << "Zip=" << work_dir << "/LevelZero_resources.zip" << std::endl;
+  contents << "Zip=" << work_dir << "/LevelOne_resources.zip" << std::endl;
 
   std::strcpy( fname, name_template );
   int fd = mkstemp( fname );
@@ -98,8 +100,8 @@ LevelZero( const std::string& work_dir )
 }
 
 // -------------------------------------------------------------------------
-LevelZero::
-~LevelZero( )
+LevelOne::
+~LevelOne( )
 {
   for( int i = this->m_BTWorld->getNumCollisionObjects( ) - 1; i >= 0; i-- )
   {
@@ -128,30 +130,48 @@ LevelZero::
 }
 
 // -------------------------------------------------------------------------
-bool LevelZero::
+bool LevelOne::
 frameStarted( const Ogre::FrameEvent& evt )
 {
     this->m_BTWorld->stepSimulation( evt.timeSinceLastEvent, 10 );
 
-    btTransform trans;
-    if( this->m_SphereBody && this->m_SphereBody->getMotionState( ) )
-      this->m_SphereBody->getMotionState( )->getWorldTransform( trans );
-    else
-      trans = this->m_SphereBody->getWorldTransform( );
-    this->m_Sphere->setPosition(
-      trans.getOrigin( ).getX( ),
-      trans.getOrigin( ).getY( ),
-      trans.getOrigin( ).getZ( )
-      );
+    for (size_t i = 0; i < mSphereBodies.size(); ++i) {
+        btRigidBody* sphereBody = this-> mSphereBodies[i];
+        Ogre::SceneNode* sphereNode = this-> mSphereNodes[i];
+
+        btTransform trans;
+        if (sphereBody && sphereBody->getMotionState()) {
+            sphereBody->getMotionState()->getWorldTransform(trans);
+        } else {
+            trans = sphereBody->getWorldTransform();
+        }
+
+        sphereNode->setPosition(
+            trans.getOrigin().getX(),
+            trans.getOrigin().getY(),
+            trans.getOrigin().getZ()
+        );
+    }
+    // btTransform trans;
+    // if( this->m_SphereBody && this->m_SphereBody->getMotionState( ) )
+    //   this->m_SphereBody->getMotionState( )->getWorldTransform( trans );
+    // else
+    //   trans = this->m_SphereBody->getWorldTransform( );
+    // this->m_Sphere->setPosition(
+    //   trans.getOrigin( ).getX( ),
+    //   trans.getOrigin( ).getY( ),
+    //   trans.getOrigin( ).getZ( )
+    //   );
 
   return( this->Laberith::BaseApplication::frameStarted( evt ) );
 }
 // -------------------------------------------------------------------------
-void LevelZero::
+void LevelOne::
 _loadScene( )
 {
   std::mt19937 rng(std::random_device{}());
 
+  std::uniform_int_distribution<int> dist(-100, 100);
   auto* root = this->getRoot( );
   auto* root_node = this->m_SceneMgr->getRootSceneNode( );
 
@@ -171,7 +191,7 @@ _loadScene( )
   camnode->attachObject( cam );
 
   this->m_CamMan = new Laberith::CameraMan( camnode,
-          Ogre::AxisAlignedBox( -100, 0, -100, 100, 5, 100 ) );
+          Ogre::AxisAlignedBox( -1000, 0, -1000, 1000, 5, 1000 ) );
   this->addInputListener( this->m_CamMan );
 
   auto vp = this->getRenderWindow( )->addViewport( cam );
@@ -179,39 +199,21 @@ _loadScene( )
 
 
   // load all the laberinths
-  auto main_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_1.obj", "main_path" );
+  auto main_path = this->_load_using_vtk( "LevelOne_resources/laberinth_level2_1.obj", "main_path" );
   auto main_path_mesh = main_path->convertToMesh( "main_path", "General" );
   auto main_path_ent = this->m_SceneMgr->createEntity( "main_path" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( main_path_ent );
   
-  auto second_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_2.obj", "second_path" );
+  auto second_path = this->_load_using_vtk( "LevelOne_resources/laberinth_level2_2.obj", "second_path" );
   auto second_path_mesh = second_path->convertToMesh( "second_path", "General" );
   auto second_path_ent = this->m_SceneMgr->createEntity( "second_path" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( second_path_ent );
 
 
-  auto third_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_3.obj", "third_path" );
+  auto third_path = this->_load_using_vtk( "LevelOne_resources/laberinth_level2_3.obj", "third_path" );
   auto third_path_mesh = third_path->convertToMesh( "third_path", "General" );
   auto third_path_ent = this->m_SceneMgr->createEntity( "third_path" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( third_path_ent );
-
-  auto sphere =
-    this->_load_using_vtk( "LevelZero_resources/sphere.vtp", "sphere" );
-  auto sphere_mesh = sphere->convertToMesh( "sphere", "General" );
-  auto sphere_ent = this->m_SceneMgr->createEntity( "sphere" );
-  this->m_Sphere = root_node->createChildSceneNode( );
-  // this->m_Sphere->setPosition(
-    // camnode->getPosition( ) + camnode->getLocalAxes( ).GetColumn( 2 )
-    // );
-  this->m_Sphere->scale(15,15,15);
-  std::uniform_int_distribution<int> dist(-100, 100);
-  int x_sphere = dist(rng);
-  int z_sphere = dist(rng);
-  this->m_Sphere->setPosition(
-     Ogre::Vector3( x_sphere, 1, z_sphere )  
-    // camnode->getPosition( ) - camnode->getLocalAxes( ).GetColumn( 2 )
-    );
-  this->m_Sphere->attachObject( sphere_ent );
 
 
   // Create "physical" world
@@ -242,34 +244,96 @@ _loadScene( )
   this->m_BTWorld->addRigidBody( floor_body );
 
 
-  btScalar sphere_radius = sphere_ent->getBoundingRadius( );
-  btCollisionShape* sphere_shape = new btSphereShape( sphere_radius );
-  this->m_BTShapes.push_back( sphere_shape );
 
-  btTransform sphere_transform;
-  sphere_transform.setIdentity();
-  btScalar sphere_mass( 1 );
-  btVector3 sphere_inertia( 0, 0, 0 );
-  sphere_shape->calculateLocalInertia( sphere_mass, sphere_inertia );
+  //create spheres
+  for (int i =0;i<5;++i){
+    // Load the sphere mesh
+    auto sphere = this->_load_using_vtk("LevelOne_resources/sphere"+std::to_string(i)+".vtp", "sphere" + std::to_string(i));
+    auto sphere_mesh = sphere->convertToMesh("sphere" + std::to_string(i), "General");
 
-  sphere_transform.setOrigin(
-    btVector3(
-      this->m_Sphere->getPosition( )[ 0 ],
-      this->m_Sphere->getPosition( )[ 1 ],
-      this->m_Sphere->getPosition( )[ 2 ]
-      )
-    );
+    // Create an entity for the sphere
+    auto sphere_ent = this->m_SceneMgr->createEntity("sphere" + std::to_string(i));
+    auto sphere_node = root_node->createChildSceneNode("sphereNode" + std::to_string(i));
+    sphere_node->scale(15, 15, 15);
 
-  btDefaultMotionState* sphere_state =
-    new btDefaultMotionState( sphere_transform );
-  btRigidBody::btRigidBodyConstructionInfo sphere_info(
-    sphere_mass, sphere_state, sphere_shape, sphere_inertia
-    );
-  this->m_SphereBody = new btRigidBody( sphere_info );
-  this->m_SphereBody->setRestitution( 1 );
-  this->m_SphereBody->setFriction( 0.08 );
-  this->m_SphereBody->setLinearVelocity(btVector3(0,3,0));
-  this->m_BTWorld->addRigidBody( this->m_SphereBody );
+    // int x_sphere = dist(rng)*5;
+    // int z_sphere = dist(rng)*5;
+    int x_sphere = i*5;
+    int z_sphere = i*5;
+    sphere_node->setPosition(Ogre::Vector3(x_sphere, 1, z_sphere));
+    sphere_node->attachObject(sphere_ent);
+
+    // Add the node to the vector
+    this-> mSphereNodes.push_back(sphere_node);
+
+    // Physics integration
+    btScalar sphere_radius = sphere_ent->getBoundingRadius();
+    btCollisionShape* sphere_shape = new btSphereShape(sphere_radius);
+    this->m_BTShapes.push_back(sphere_shape);
+
+    btTransform sphere_transform;
+    sphere_transform.setIdentity();
+    btScalar sphere_mass(1);
+    btVector3 sphere_inertia(0, 0, 0);
+    sphere_shape->calculateLocalInertia(sphere_mass, sphere_inertia);
+
+    // Use the position of the Ogre::SceneNode for the sphere
+    Ogre::Vector3 ogreSpherePos = sphere_node->getPosition();
+    sphere_transform.setOrigin(btVector3(ogreSpherePos.x, ogreSpherePos.y, ogreSpherePos.z));
+
+    btDefaultMotionState* sphere_state = new btDefaultMotionState(sphere_transform);
+    btRigidBody::btRigidBodyConstructionInfo sphere_info(sphere_mass, sphere_state, sphere_shape, sphere_inertia);
+    btRigidBody* sphere_body = new btRigidBody(sphere_info);
+    sphere_body->setRestitution(1);
+    sphere_body->setFriction(0.08);
+    sphere_body->setLinearVelocity(btVector3(0, 3, 0));
+
+    this->m_BTWorld->addRigidBody(sphere_body);
+    this-> mSphereBodies.push_back(sphere_body);
+
+  }
+
+  // auto sphere =
+  //   this->_load_using_vtk( "LevelOne_resources/sphere.vtp", "sphere" );
+  // auto sphere_mesh = sphere->convertToMesh( "sphere", "General" );
+  // auto sphere_ent = this->m_SceneMgr->createEntity( "sphere" );
+  // this->m_Sphere = root_node->createChildSceneNode( );
+  // this->m_Sphere->scale(15,15,15);
+  // int x_sphere = dist(rng)*5 ;
+  // int z_sphere = dist(rng)*5 ;
+  // this->m_Sphere->setPosition(
+  //    Ogre::Vector3( x_sphere, 1, z_sphere )  );
+  // this->m_Sphere->attachObject( sphere_ent );
+
+
+  // btScalar sphere_radius = sphere_ent->getBoundingRadius( );
+  // btCollisionShape* sphere_shape = new btSphereShape( sphere_radius );
+  // this->m_BTShapes.push_back( sphere_shape );
+
+  // btTransform sphere_transform;
+  // sphere_transform.setIdentity();
+  // btScalar sphere_mass( 1 );
+  // btVector3 sphere_inertia( 0, 0, 0 );
+  // sphere_shape->calculateLocalInertia( sphere_mass, sphere_inertia );
+
+  // sphere_transform.setOrigin(
+  //   btVector3(
+  //     this->m_Sphere->getPosition( )[ 0 ],
+  //     this->m_Sphere->getPosition( )[ 1 ],
+  //     this->m_Sphere->getPosition( )[ 2 ]
+  //     )
+  //   );
+
+  // btDefaultMotionState* sphere_state =
+  //   new btDefaultMotionState( sphere_transform );
+  // btRigidBody::btRigidBodyConstructionInfo sphere_info(
+  //   sphere_mass, sphere_state, sphere_shape, sphere_inertia
+  //   );
+  // this->m_SphereBody = new btRigidBody( sphere_info );
+  // this->m_SphereBody->setRestitution( 1 );
+  // this->m_SphereBody->setFriction( 0.08 );
+  // this->m_SphereBody->setLinearVelocity(btVector3(0,3,0));
+  // this->m_BTWorld->addRigidBody( this->m_SphereBody );
 }
 
 // eof - $RCSfile$

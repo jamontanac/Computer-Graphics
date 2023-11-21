@@ -73,10 +73,15 @@ def create_random_cubes(start_center, size, n):
 
         cubes_center[i] = list(start_center)
         center_cubes[tuple(start_center)] = i
+        available_directions = list(directions.keys())
+        available_directions.remove("-y")
+        available_directions.remove("y")
         if i>0:
+            available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i-1]])
             for k_direction in list(directions.keys()):
-                neighbour = start_center + np.array(directions[k_direction]) *size
+                neighbour = start_center + np.array(directions[k_direction]) * size
                 if tuple(neighbour) in center_cubes:
+
                     #we remove the face of cube i in direction k
                     faces_to_remove.extend(get_faces_to_remove(i,k_direction))
                     # then we need to remove the face of cube j in direction -k
@@ -85,11 +90,8 @@ def create_random_cubes(start_center, size, n):
             
         
         if i< n-1:
-            available_directions = list(directions.keys())
-            if i in cube_directions:
-                available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i]])
-            direction_key = random.choices(available_directions,weights=[0.3,0.2,0,0,0.3,0.2],k=1)[0]
-            # direction_key = random.choice(available_directions)
+            
+            direction_key = random.choice(available_directions)
             cube_directions[i] = direction_key
             direction = directions[direction_key]
 
@@ -97,7 +99,6 @@ def create_random_cubes(start_center, size, n):
 
     combined_vertices = np.concatenate(all_vertices)
     combined_faces = np.concatenate(all_faces)
-    print(cubes_center)
     combined_faces = np.delete(combined_faces,faces_to_remove,axis=0)
     return combined_vertices, combined_faces
 

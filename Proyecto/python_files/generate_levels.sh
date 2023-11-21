@@ -28,10 +28,15 @@ for level in 1 2 3; do
         else
             # For other values of i, use random x and z
             x=$(( (RANDOM % 10)- 10 ))
-            x=$(( (x * 5) % 15 ))
+            x=$(( (x * 15) ))
             z=$(( (RANDOM % 10)-10 ))
-            z=$(( (z * 5) % 15 ))
+            z=$(( (z * 15) ))
         fi
         run_python_script "$level_folder" "laberinth_level${level}_${i}.stl" "${x}" 0 "${z}" "${length}" "laberinth_level${level}_${i}.obj"
     done
 done
+mv level_1/*.obj ../src/LevelZero/resources
+mv level_2/*.obj ../src/LevelOne/resources
+mv level_3/*.obj ../src/LevelTwo/resources
+rm -r level_*
+

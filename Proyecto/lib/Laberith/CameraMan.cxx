@@ -57,7 +57,7 @@ frameRendered( const Ogre::FrameEvent& evt )
     v.normalise( );
 
     Ogre::Real n = this->m_Top * Ogre::Real( evt.timeSinceLastFrame );
-    n *= Ogre::Real( ( this->m_Fast )? 10: 1 );
+    n *= Ogre::Real( ( this->m_Fast )? 40: 15 );
 
     Ogre::Real na = 0, nb = 0;
     if( this->m_Forward || this->m_Backwards )

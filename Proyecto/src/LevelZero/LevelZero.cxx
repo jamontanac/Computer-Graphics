@@ -171,7 +171,7 @@ _loadScene( )
   camnode->attachObject( cam );
 
   this->m_CamMan = new Laberith::CameraMan( camnode,
-          Ogre::AxisAlignedBox( -100, 0, -100, 100, 5, 100 ) );
+          Ogre::AxisAlignedBox( -500, 0, -500, 500, 5, 500 ) );
   this->addInputListener( this->m_CamMan );
 
   auto vp = this->getRenderWindow( )->addViewport( cam );

@@ -58,6 +58,8 @@ setup( )
   this->_initSceneManager( );
   this->setWindowGrab( true );
   this->_loadScene( );
+  // this->configure();
+
 }
 
 // -------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-material room
+material main_path
 {
 	receive_shadows on
 	technique
@@ -10,6 +10,25 @@ material room
                         texture_unit
                         {
                                 texture LevelZero_resources/wall.png
+                                scale 0.1 0.1
+                        }
+		}
+	}
+}
+
+
+material second_path
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.3 0.3 0.5
+			diffuse 0.3 0.3 0.3 1
+                        texture_unit
+                        {
+                                texture LevelZero_resources/neon.png
                                 scale 0.3 0.3
                         }
 		}

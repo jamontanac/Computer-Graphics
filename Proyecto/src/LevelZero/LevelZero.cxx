@@ -65,18 +65,11 @@ _loadScene( )
   auto* root = this->getRoot( );
   auto* root_node = this->m_SceneMgr->getRootSceneNode( );
 
-  // Load room geometry
-  auto room = this->_load_using_vtk( "LevelZero_resources/room.obj", "room" );
-  auto bb = room->getBoundingBox( );
-  auto cog = bb.getMaximum( ) + bb.getMinimum( );
-  cog *= 0;
-  std::cout<<cog<<std::endl;
   // Configure illumination
   this->m_SceneMgr->setAmbientLight( Ogre::ColourValue( 1, 1, 1 ) );
-
   auto light = this->m_SceneMgr->createLight( "MainLight" );
   auto lightnode = root_node->createChildSceneNode( );
-  lightnode->setPosition( cog );
+  lightnode->setPosition(  Ogre::Vector3( 0, 2, 0 )   );
   lightnode->attachObject( light );
 
   // Configure camera
@@ -84,24 +77,31 @@ _loadScene( )
   cam->setNearClipDistance( 0.005 );
   cam->setAutoAspectRatio( true );
   auto camnode = root_node->createChildSceneNode( );
-  camnode->setPosition( cog );
+  camnode->setPosition( Ogre::Vector3( 0, 0, 0 )  );
   camnode->attachObject( cam );
 
-  this->m_CamMan = new Laberith::CameraMan( camnode, bb );
+  this->m_CamMan = new Laberith::CameraMan( camnode,
+          Ogre::AxisAlignedBox( -100, 0, -100, 100, 5, 100 ) );
   this->addInputListener( this->m_CamMan );
 
   auto vp = this->getRenderWindow( )->addViewport( cam );
   vp->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
+  auto main_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_1.obj", "main_path" );
+
+  // auto second_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_2.obj", "second_path" );
+  // auto bb = main_path->getBoundingBox( );
+  // auto cog = bb.getMaximum( ) + bb.getMinimum( );
+  // cog *= 0;
+  // std::cout<<cog<<std::endl;
 
   // Meshes
-  auto room_mesh = room->convertToMesh( "room", "General" );
-  auto room_ent = this->m_SceneMgr->createEntity( "room" );
-  this->m_SceneMgr->getRootSceneNode( )->attachObject( room_ent );
+  auto main_path_mesh = main_path->convertToMesh( "main_path", "General" );
+  auto main_path_ent = this->m_SceneMgr->createEntity( "main_path" );
+  this->m_SceneMgr->getRootSceneNode( )->attachObject( main_path_ent );
 
-  auto table = this->_load_using_vtk( "LevelZero_resources/table.stl", "room" );
-  auto table_mesh = table->convertToMesh( "table", "General" );
-  auto table_ent = this->m_SceneMgr->createEntity( "table" );
-  this->m_SceneMgr->getRootSceneNode( )->attachObject( table_ent );
+  // auto second_path_mesh = second_path->convertToMesh( "second_path", "General" );
+  // auto second_path_ent = this->m_SceneMgr->createEntity( "second_path" );
+  // this->m_SceneMgr->getRootSceneNode( )->attachObject( second_path_ent );
 }
 
 // eof - $RCSfile$

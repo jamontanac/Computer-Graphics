@@ -2,6 +2,7 @@
 subdirs(resources)
 
 include_directories(
+  ${BULLET_INCLUDE_DIRS}
   ${PROJECT_BINARY_DIR}/lib
   ${PROJECT_SOURCE_DIR}/lib
   )

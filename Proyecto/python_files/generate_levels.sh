@@ -8,8 +8,6 @@ run_python_script() {
     z=$5
     param=$6
     obj_file=$7
-    echo "${folder}" "${base_name}" "${x},${y},${z}" "${param}"
-    echo "${obj_file}"
     cd "${folder}"
     # Run the python script
     python ../build_Laberith.py "${base_name}" "${x},${y},${z}" "$param"
@@ -22,11 +20,16 @@ for level in 1 2 3; do
     level_folder="level_${level}"
     mkdir -p "${level_folder}"
     length=$((50 * level))
-    for i in $(seq 1 10); do
-        x=$((RANDOM % 20))
-        z=$((RANDOM % 20))
-        # echo "${level_folder}" "laberinth_level${level}_${i}.stl" "${x}" 0 "${z}"  "${length}" "laberinth_level${level}_${i}.obj"
+    for i in $(seq 1 3); do
+        if [ "$i" -eq 1 ]; then
+            # When i=1, set x and z to 0
+            x=0
+            z=0
+        else
+            # For other values of i, use random x and z
+            x=$((RANDOM % 20))
+            z=$((RANDOM % 20))
+        fi
         run_python_script "$level_folder" "laberinth_level${level}_${i}.stl" "${x}" 0 "${z}" "${length}" "laberinth_level${level}_${i}.obj"
     done
 done
-

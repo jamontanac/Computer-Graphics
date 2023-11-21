@@ -8,6 +8,7 @@
 #include <sstream>
 #include <unistd.h>
 
+#include <btBulletDynamicsCommon.h>
 #include <Ogre.h>
 
 /**
@@ -19,8 +20,23 @@ public:
   LevelZero( const std::string& work_dir );
   virtual ~LevelZero( ) override;
 
+  // virtual bool keyPressed( const OgreBites::KeyboardEvent& evt ) override;
+  // virtual bool frameStarted( const Ogre::FrameEvent& evt ) override;
 protected:
   virtual void _loadScene( ) override;
+protected:
+
+  Ogre::SceneNode* walls     { nullptr };
+  btRigidBody*     walls_body { nullptr };
+
+  bool m_Simulating { false };
+
+  btDefaultCollisionConfiguration* m_BTConf;
+  btCollisionDispatcher* m_BTDispatcher;
+  btBroadphaseInterface* m_BTCache;
+  btSequentialImpulseConstraintSolver* m_BTSolver;
+  btDiscreteDynamicsWorld* m_BTWorld;
+  btAlignedObjectArray< btCollisionShape* > m_BTShapes;
 };
 
 // -------------------------------------------------------------------------
@@ -55,6 +71,29 @@ LevelZero( const std::string& work_dir )
 LevelZero::
 ~LevelZero( )
 {
+  for( int i = this->m_BTWorld->getNumCollisionObjects( ) - 1; i >= 0; i-- )
+  {
+    btCollisionObject* obj = this->m_BTWorld->getCollisionObjectArray( )[ i ];
+    btRigidBody* body = btRigidBody::upcast( obj );
+    if( body && body->getMotionState( ) )
+      delete body->getMotionState( );
+    this->m_BTWorld->removeCollisionObject( obj );
+    delete obj;
+  } // end for
+
+  for( int j = 0; j < this->m_BTShapes.size( ); j++ )
+  {
+    btCollisionShape* shape = this->m_BTShapes[ j ];
+    this->m_BTShapes[ j ] = 0;
+    delete shape;
+  } // end for
+
+  delete this->m_BTWorld;
+  delete this->m_BTSolver;
+  delete this->m_BTCache;
+  delete this->m_BTDispatcher;
+  delete this->m_BTConf;
+  this->m_BTShapes.clear( );
   unlink( this->m_ResourcesFile.c_str( ) );
 }
 
@@ -69,7 +108,7 @@ _loadScene( )
   this->m_SceneMgr->setAmbientLight( Ogre::ColourValue( 1, 1, 1 ) );
   auto light = this->m_SceneMgr->createLight( "MainLight" );
   auto lightnode = root_node->createChildSceneNode( );
-  lightnode->setPosition(  Ogre::Vector3( 0, 2, 0 )   );
+  lightnode->setPosition(  Ogre::Vector3( 0, 0, 0 )   );
   lightnode->attachObject( light );
 
   // Configure camera
@@ -87,8 +126,8 @@ _loadScene( )
   auto vp = this->getRenderWindow( )->addViewport( cam );
   vp->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
   auto main_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_1.obj", "main_path" );
+  auto second_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_2.obj", "second_path" );
 
-  // auto second_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_2.obj", "second_path" );
   // auto bb = main_path->getBoundingBox( );
   // auto cog = bb.getMaximum( ) + bb.getMinimum( );
   // cog *= 0;
@@ -99,9 +138,9 @@ _loadScene( )
   auto main_path_ent = this->m_SceneMgr->createEntity( "main_path" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( main_path_ent );
 
-  // auto second_path_mesh = second_path->convertToMesh( "second_path", "General" );
-  // auto second_path_ent = this->m_SceneMgr->createEntity( "second_path" );
-  // this->m_SceneMgr->getRootSceneNode( )->attachObject( second_path_ent );
+  auto second_path_mesh = second_path->convertToMesh( "second_path", "General" );
+  auto second_path_ent = this->m_SceneMgr->createEntity( "second_path" );
+  this->m_SceneMgr->getRootSceneNode( )->attachObject( second_path_ent );
 }
 
 // eof - $RCSfile$

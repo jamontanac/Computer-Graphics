@@ -24,15 +24,18 @@ for level in 1 2 3; do
         if [ "$i" -eq 1 ]; then
             # When i=1, set x and z to 0
             x=0
-            z=0
+            y=0
+            z=0    
         else
             # For other values of i, use random x and z
             x=$(( (RANDOM % 10)- 10 ))
             x=$(( (x * 15) ))
+            y=$(( (RANDOM % 10)- 10 ))
+            y=$(( (x * 15) ))
             z=$(( (RANDOM % 10)-10 ))
             z=$(( (z * 15) ))
         fi
-        run_python_script "$level_folder" "laberinth_level${level}_${i}.stl" "${x}" 0 "${z}" "${length}" "laberinth_level${level}_${i}.obj"
+        run_python_script "$level_folder" "laberinth_level${level}_${i}.stl" "${x}" "${y}" "${z}" "${length}" "laberinth_level${level}_${i}.obj"
     done
 done
 mv level_1/*.obj ../src/LevelZero/resources

@@ -74,8 +74,6 @@ def create_random_cubes(start_center, size, n):
         cubes_center[i] = list(start_center)
         center_cubes[tuple(start_center)] = i
         available_directions = list(directions.keys())
-        available_directions.remove("-y")
-        available_directions.remove("y")
         if i>0:
             available_directions.remove({"x": "-x", "-x": "x", "y": "-y", "-y": "y", "z": "-z", "-z": "z"}[cube_directions[i-1]])
             for k_direction in list(directions.keys()):
@@ -111,58 +109,11 @@ def write_initial_stl(name,center,n):
         for j in range(3):
             cube.vectors[i][j] = vertices[f[j]]
 
-    # cube.save('Laberith.stl')
     cube.save(name)
 
-def improve_stl(stl_filename, texture_image):
-    reader = vtk.vtkSTLReader()
-    reader.SetFileName(stl_filename)
-    reader.Update()
-    # compute normals
-    normals = vtk.vtkPolyDataNormals()
-    normals.SetInputConnection(reader.GetOutputPort())
-    # normals.GetComputePointNormals()
-    normals.ComputePointNormalsOff()
-    normals.ComputeCellNormalsOn()
-    normals.Update()
-    inverted_normals = vtk.vtkPolyDataNormals()
-    inverted_normals.SetInputConnection(reader.GetOutputPort())
-    inverted_normals.ComputePointNormalsOff()
-    inverted_normals.ComputeCellNormalsOn()
-    inverted_normals.FlipNormalsOn()
-    inverted_normals.Update()
-    combined_normals = vtk.vtkAppendPolyData()
-    combined_normals.AddInputData(normals.GetOutput())
-    combined_normals.AddInputData(inverted_normals.GetOutput())
-    combined_normals.Update()
-
-    # surface.SetInputConnection( reader.GetOutputPort( ) )
-    # surface.SetValue( 0, 0.0 )
-
-    
-
-    #texture
-    texture_reader = vtk.vtkPNGReader()
-    texture_reader.SetFileName(texture_image)
-    texture_reader.Update()
-
-    texture = vtk.vtkTexture()
-    texture.SetInputConnection(texture_reader.GetOutputPort())
-    texture_coordinates = vtk.vtkTextureMapToPlane()
-    texture_coordinates.SetInputConnection(combined_normals.GetOutputPort())
-    texture_coordinates.AutomaticPlaneGenerationOn()
-    texture_coordinates.Update()
-
-    writer = vtk.vtkSTLWriter()
-    writer.SetFileName(stl_filename)
-
-    writer.SetInputConnection(texture_coordinates.GetOutputPort())
-    writer.Write()
 
 name = sys.argv[1]
 center = [int(i) for i in sys.argv[2].split(",") ]
 n = int(sys.argv[3])  # Number of cubes
 texture_file = '/Users/montajos/Dropbox/Computacion Grafica/Proyecto/src/LevelZero/resources/wall.png'
 write_initial_stl(name,center,n)
-# improve_stl(name, texture_file)
-# print([int(i) for i in center.split(",")])

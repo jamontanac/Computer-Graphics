@@ -42,34 +42,6 @@ protected:
 };
 
 // -------------------------------------------------------------------------
-// bool LevelZero::
-// keyPressed( const OgreBites::KeyboardEvent& evt )
-// {
-//   if( evt.keysym.sym == 'f' )
-//   {
-//     this->m_SphereBody->getWorldTransform( ).setOrigin(
-//       btVector3(
-//         this->m_Sphere->getPosition( )[ 0 ],
-//         this->m_Sphere->getPosition( )[ 1 ],
-//         this->m_Sphere->getPosition( )[ 2 ]
-//         )
-//       );
-
-//     auto cam = this->m_CamMan->getCamera( );
-//     this->m_SphereBody->setLinearVelocity(
-//       btVector3(0,0,0)
-//       // btVector3(
-//       //   -10 * cam->getLocalAxes( ).GetColumn( 2 )[ 0 ],
-//       //   -10 * cam->getLocalAxes( ).GetColumn( 2 )[ 1 ],
-//       //   -10 * cam->getLocalAxes( ).GetColumn( 2 )[ 2 ]
-//       //   )
-//       );
-
-//     this->m_Simulating = true;
-//   } // end if
-//   return( this->Laberith::BaseApplication::keyPressed( evt ) );
-// }
-// -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
   std::filesystem::path p( argv[ 0 ] );
@@ -162,21 +134,6 @@ _loadScene( )
   lightnode->setPosition(  Ogre::Vector3( 0, 0, 0 )   );
   lightnode->attachObject( light );
 
-  // Configure camera
-  auto cam = this->m_SceneMgr->createCamera( "MainCamera" );
-  cam->setNearClipDistance( 0.005 );
-  cam->setAutoAspectRatio( true );
-  auto camnode = root_node->createChildSceneNode( );
-  camnode->setPosition( Ogre::Vector3( 0, 0, 0 )  );
-  camnode->attachObject( cam );
-
-  this->m_CamMan = new Laberith::CameraMan( camnode,
-          Ogre::AxisAlignedBox( -500, -100, -500, 500, 100, 500 ) );
-  this->addInputListener( this->m_CamMan );
-
-  auto vp = this->getRenderWindow( )->addViewport( cam );
-  vp->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
-
 
   // load all the laberinths
   auto main_path = this->_load_using_vtk( "LevelZero_resources/laberinth_level1_1.obj", "main_path" );
@@ -194,6 +151,29 @@ _loadScene( )
   auto third_path_mesh = third_path->convertToMesh( "third_path", "General" );
   auto third_path_ent = this->m_SceneMgr->createEntity( "third_path" );
   this->m_SceneMgr->getRootSceneNode( )->attachObject( third_path_ent );
+
+  // auto bb_main = main_path->getBoundingBox( );
+  // auto bb_second = second_path->getBoundingBox( );
+  // auto bb_third = third_path->getBoundingBox( );
+  // auto cog = bb_main.getMaximum( ) + bb_main.getMinimum( );
+  // cog += bb_second.getMaximum( ) + bb_second.getMinimum( );
+  // cog += bb_third.getMaximum( ) + bb_third.getMinimum( );
+ 
+  // std::cout<<root_node->getBoundingBox()<<std::endl;
+  // Configure camera
+  auto cam = this->m_SceneMgr->createCamera( "MainCamera" );
+  cam->setNearClipDistance( 0.005 );
+  cam->setAutoAspectRatio( true );
+  auto camnode = root_node->createChildSceneNode( );
+  camnode->setPosition( Ogre::Vector3( 0, 0, 0 )  );
+  camnode->attachObject( cam );
+
+  this->m_CamMan = new Laberith::CameraMan( camnode,
+          Ogre::AxisAlignedBox( -500, -100, -500, 500, 100, 500 ) );
+  this->addInputListener( this->m_CamMan );
+
+  auto vp = this->getRenderWindow( )->addViewport( cam );
+  vp->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
 
   auto sphere =
     this->_load_using_vtk( "LevelZero_resources/sphere.vtp", "sphere" );
